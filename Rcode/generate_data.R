@@ -1,4 +1,3 @@
-
 generate_data <- function(n, 
                           population_model,
                           datatype = c("normal", "nonnormal"), 
