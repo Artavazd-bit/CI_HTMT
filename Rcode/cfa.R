@@ -24,9 +24,9 @@ cfa_one <- function(data, alpha = 0.05){
   
   lrt <- lavaan::lavTestLRT(fit_uncon, fit_con)
   
-  pe  <- lavaan::parameterEstimates(fit_uncon, level = alpha)
+  pe  <- lavaan::parameterEstimates(fit_uncon, level = 1 - alpha)
   row <- pe[pe$lhs == "xi_1" & pe$op == "~~" & pe$rhs == "xi_2", ]
   
   data.frame(cor_est = row$est, lowerbound = row$ci.lower, upperbound = row$ci.upper,
-             chisq_diff = lrt$`Chisq diff`[2], p_diff = lrt$`Pr(>Chisq)`[2])
+             chisq_diff = lrt$`Chisq diff`[2], p_diff = lrt$`Pr(>Chisq)`[2], df_diff = lrt$`Df diff`[2])
 }

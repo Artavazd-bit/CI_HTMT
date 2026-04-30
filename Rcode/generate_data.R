@@ -1,20 +1,33 @@
 
-generate_data <- function(n, beta, sigma = 1) {
-  x <- rnorm(n)
-  y <- beta * x + rnorm(n, sd = sigma)
-  data.frame(x = x, y = y)
-}
-
-analyse_one <- function(n, beta, sigma = 1) {
-  d   <- generate_data(n, beta, sigma)
-  fit <- lm(y ~ x, data = d)
-  ci  <- confint(fit, "x", level = 0.95)
-  data.frame(
-    n        = n,
-    beta     = beta,
-    bhat     = unname(coef(fit)["x"]),
-    ci_lo    = ci[1],
-    ci_hi    = ci[2],
-    covered  = ci[1] <= beta & beta <= ci[2]
+generate_data <- function(n, 
+                          population_model,
+                          datatype = c("normal", "nonnormal"), 
+                          skewness = NULL, 
+                          kurtosis = NULL) {
+  datatype = match.arg(datatype)
+  
+  if(datatype == "normal"){
+    return(lavaan::simulateData(
+      model = population_model,
+      sample.nobs = n,
+      empirical = FALSE, 
+      kurtosis = NULL,
+      skewness = NULL
+    ))
+  }
+  
+  fit <- sem(population_model, do.fit = FALSE)
+  popcov <- lavInspect(fit, "implied")$cov
+  
+  res <- covsim::rPLSIM(
+    N = n, 
+    sigma.target = popcov, 
+    skewness = skewness,
+    kurtosis = kurtosis,
+    reps = 1, 
+    verbose = FALSE
   )
+  out <- as.data.frame(res[1][1])
+  colnames(out) <- colnames(popcov)
+  out
 }
