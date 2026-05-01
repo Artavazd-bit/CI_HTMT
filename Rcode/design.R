@@ -1,7 +1,6 @@
 library(lavaan)
 library(dplyr)
 
-
 nindicator <- 3
 coefs <- 1
 corr <- c(0.7, 0.8, 0.9, 0.95, 1)
