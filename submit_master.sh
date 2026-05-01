@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=ci-htmt-sim
-#SBATCH --array=1-1350%50
+#SBATCH --array=1-1350
 #SBATCH --output=results/logs/out/sim-%A_%a.out
 #SBATCH --error=results/logs/err/sim-%A_%a.err
 #SBATCH --time=02:00:00
