@@ -15,7 +15,6 @@ cd "${SLURM_SUBMIT_DIR:-$(pwd)}"
 
 mkdir -p results/ci results/lrt results/errors results/logs/out results/logs/err
 
-module load R/4.5.0
 export RENV_PATHS_CACHE="${SCRATCH:-$HOME}/renv-cache"
 
 Rscript Rcode/sim.R
