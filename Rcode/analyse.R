@@ -37,7 +37,8 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3, alpha = 0.05) {
       )
       ci_bc  <- bootbc (b,    alpha = alpha, estimate = htmt_pe)
       ci_bca <- bootbca(b, j, alpha = alpha, estimate = htmt_pe)
-      list(htmt_pe = htmt_pe, dm = htmt_dm, perc = ci_perc, bc = ci_bc, bca = ci_bca)
+      list(htmt_pe = htmt_pe, dm = htmt_dm, perc = ci_perc, bc = ci_bc, bca = ci_bca,
+           n_boot_valid = length(b), n_jack_valid = length(j))
     }, error = function(e) { htmt_err <<- conditionMessage(e); NULL }),
     warning = function(w) {
       warns_htmt <<- c(warns_htmt, conditionMessage(w))
@@ -79,6 +80,10 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3, alpha = 0.05) {
     estimator       = c("cfa", "htmt"),
     error_message   = c(cfa_err, htmt_err),
     warning_message = c(collapse_warns(warns_cfa), collapse_warns(warns_htmt)),
+    n_boot_valid    = c(NA_integer_,
+                        if (!is.null(htmt_res)) htmt_res$n_boot_valid else NA_integer_),
+    n_jack_valid    = c(NA_integer_,
+                        if (!is.null(htmt_res)) htmt_res$n_jack_valid else NA_integer_),
     stringsAsFactors = FALSE
   )
 
