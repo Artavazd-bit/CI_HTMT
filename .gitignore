@@ -56,3 +56,6 @@ rsconnect/
 
 # claude
 .claude/
+
+# mac files
+.DS_Store
