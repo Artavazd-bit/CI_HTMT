@@ -37,8 +37,8 @@ bootbca <- function(boot, jack, alpha = 0.05, estimate){
 bootbc <- function(boot, alpha = 0.05, estimate){
   z0 <- qnorm(p = mean(boot < estimate), mean = 0, sd = 1)
   
-  zalpha <- qnorm(p = alpha/2)
-  zalpha2 <- qnorm(p = 1-(alpha/2))
+  zalpha <- qnorm(p = alpha/2, mean = 0, sd = 1)
+  zalpha2 <- qnorm(p = 1-(alpha/2), mean = 0, sd = 1)
   
   bc1 <- pnorm(q = 2 * z0 + zalpha, sd = 1, mean = 0)
   bc2 <- pnorm(q = 2 * z0 + zalpha2, sd = 1, mean = 0)
