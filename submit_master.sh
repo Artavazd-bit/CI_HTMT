@@ -8,6 +8,9 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
 #SBATCH --partition=standard
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=jason.berger@uni-wuerzburg.de
+#SBATCH --qos=cpu
 
 set -euo pipefail
 
