@@ -1,5 +1,6 @@
 library(lavaan)
 library(dplyr)
+library(foreach)
 
 nindicator <- 3
 coefs <- 1
@@ -52,9 +53,27 @@ conditions <- expand.grid(rep_batch = 1:10,
                           datatype = c(1 , 2, 3)
                           )
 
-conditions <- conditions %>% 
+conditions <- conditions %>%
               left_join(dt_lookup, by = "datatype") %>%
-              left_join(short_models, by = "correlation") 
+              left_join(short_models, by = "correlation")
+
+unique_cond <- unique(conditions[, c("correlation", "n", "datatype")])
+unique_cond <- unique_cond[order(unique_cond$correlation, unique_cond$n, unique_cond$datatype), ]
+unique_cond$condition_id <- seq_len(nrow(unique_cond))
+
+conditions <- conditions %>% left_join(unique_cond, by = c("correlation", "n", "datatype"))
+conditions <- conditions[order(conditions$condition_id, conditions$rep_batch), ]
+conditions$task_id <- seq_len(nrow(conditions))
+
+conditions <- conditions[, c("task_id", "condition_id", "rep_batch",
+                             "correlation", "n", "datatype", "dtype",
+                             "skewness", "kurtosis", "model", "model_id")]
+rownames(conditions) <- NULL
+
+saveRDS(conditions, file = "conditions.rds")
+message(sprintf("Wrote conditions.rds: %d rows (%d unique conditions x %d batches).",
+                nrow(conditions), length(unique(conditions$condition_id)),
+                length(unique(conditions$rep_batch))))
 
 
 

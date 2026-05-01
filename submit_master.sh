@@ -1,16 +1,21 @@
 #!/bin/bash
-#SBATCH --job-name=mysim-master
-#SBATCH --output=logs/master-%j.out
-#SBATCH --error=logs/master-%j.err
-#SBATCH --time=12:00:00
+#SBATCH --job-name=ci-htmt-sim
+#SBATCH --array=1-1350%50
+#SBATCH --output=results/logs/out/sim-%A_%a.out
+#SBATCH --error=results/logs/err/sim-%A_%a.err
+#SBATCH --time=02:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=2G
+#SBATCH --mem=4G
 #SBATCH --partition=standard
 
-mkdir -p logs results
+set -euo pipefail
+
+cd "${SLURM_SUBMIT_DIR:-$(pwd)}"
+
+mkdir -p results/ci results/lrt results/errors results/logs/out results/logs/err
 
 module load R/4.5.0
 export RENV_PATHS_CACHE="${SCRATCH:-$HOME}/renv-cache"
 
-Rscript sim.R
+Rscript Rcode/sim.R

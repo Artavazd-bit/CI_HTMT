@@ -19,11 +19,12 @@ generate_data <- function(n,
   popcov <- lavInspect(fit, "implied")$cov
   
   res <- covsim::rPLSIM(
-    N = n, 
-    sigma.target = popcov, 
+    N = n,
+    sigma.target = popcov,
     skewness = skewness,
-    kurtosis = kurtosis,
-    reps = 1, 
+    excesskurtosis = kurtosis,
+    numsegments = 8,
+    reps = 1,
     verbose = FALSE
   )
   out <- as.data.frame(res[1][1])
