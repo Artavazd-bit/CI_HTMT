@@ -1,5 +1,3 @@
-source("renv/activate.R")
-
 suppressPackageStartupMessages({
   library(lavaan)
   library(covsim)

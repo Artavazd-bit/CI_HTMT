@@ -15,8 +15,13 @@ set -euo pipefail
 
 cd "${SLURM_SUBMIT_DIR:-$(pwd)}"
 
-mkdir -p results/ci results/lrt results/errors results/logs/out results/logs/err
+mkdir -p results/ci results/lrt results/errors results/logs/out results/logs/err results/datasets
 
 export RENV_PATHS_CACHE="${SCRATCH:-$HOME}/renv-cache"
+
+export OPENBLAS_NUM_THREADS=1
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export BLIS_NUM_THREADS=1
 
 Rscript Rcode/sim.R
