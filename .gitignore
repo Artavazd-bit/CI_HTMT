@@ -21,8 +21,11 @@
 # RStudio files
 .Rproj.user/
 
-#results 
+#results
 results/
+
+#plots
+plots/
 
 #registry
 registry/
