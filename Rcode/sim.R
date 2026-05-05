@@ -45,9 +45,10 @@ for (k in seq_len(REPS_PER_TASK)) {
   streams[[k]] <- stream
 }
 
-ci_list  <- vector("list", REPS_PER_TASK)
-lrt_list <- vector("list", REPS_PER_TASK)
-err_list <- vector("list", REPS_PER_TASK)
+ci_list   <- vector("list", REPS_PER_TASK)
+lrt_list  <- vector("list", REPS_PER_TASK)
+err_list  <- vector("list", REPS_PER_TASK)
+data_list <- vector("list", REPS_PER_TASK)
 
 cond_cols <- cond[, c("task_id", "condition_id", "rep_batch",
                       "correlation", "n", "datatype", "dtype")]
@@ -68,6 +69,15 @@ for (k in seq_len(REPS_PER_TASK)) {
       gen_warns <<- c(gen_warns, conditionMessage(w))
       invokeRestart("muffleWarning")
     }
+  )
+
+  data_list[[k]] <- list(
+    rep_in_batch = k,
+    task_id      = task_id,
+    condition_id = cond$condition_id,
+    rep_batch    = cond$rep_batch,
+    seed         = seed_k,
+    data         = d
   )
 
   if (is.null(d)) {
@@ -119,18 +129,22 @@ results_ci  <- do.call(rbind, ci_list)
 results_lrt <- do.call(rbind, lrt_list)
 results_err <- do.call(rbind, err_list)
 
-dir.create("results/ci",     recursive = TRUE, showWarnings = FALSE)
-dir.create("results/lrt",    recursive = TRUE, showWarnings = FALSE)
-dir.create("results/errors", recursive = TRUE, showWarnings = FALSE)
+dir.create("results/ci",       recursive = TRUE, showWarnings = FALSE)
+dir.create("results/lrt",      recursive = TRUE, showWarnings = FALSE)
+dir.create("results/errors",   recursive = TRUE, showWarnings = FALSE)
+dir.create("results/datasets", recursive = TRUE, showWarnings = FALSE)
 
 saveRDS(results_ci,
-        file = file.path("results/ci",     sprintf("ci_task_%05d.rds",     task_id)))
+        file = file.path("results/ci",       sprintf("ci_task_%05d.rds",     task_id)))
 saveRDS(results_lrt,
-        file = file.path("results/lrt",    sprintf("lrt_task_%05d.rds",    task_id)))
+        file = file.path("results/lrt",      sprintf("lrt_task_%05d.rds",    task_id)))
 saveRDS(results_err,
-        file = file.path("results/errors", sprintf("errors_task_%05d.rds", task_id)))
+        file = file.path("results/errors",   sprintf("errors_task_%05d.rds", task_id)))
+saveRDS(data_list,
+        file = file.path("results/datasets", sprintf("df_task_%05d.rds",     task_id)))
 
-message(sprintf("Task %d done: ci=%d, lrt=%d, errors=%d rows.",
-                task_id, nrow(results_ci), nrow(results_lrt), nrow(results_err)))
+message(sprintf("Task %d done: ci=%d, lrt=%d, errors=%d rows, datasets=%d.",
+                task_id, nrow(results_ci), nrow(results_lrt), nrow(results_err),
+                length(data_list)))
 
 writeLines(capture.output(sessionInfo()), con = stderr())
