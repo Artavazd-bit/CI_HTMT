@@ -37,6 +37,12 @@ ci_file  <- file.path(results_dir, "ci", sprintf("ci_task_%05d.rds", task_id))
 ci_saved <- readRDS(ci_file)
 saved    <- ci_saved[ci_saved$task_id == task_id &
                      ci_saved$rep_in_batch == rep_in_batch, ]
+# Anchor the comparison to the 95% rows (the only level that existed in
+# pre-multi-conf-level result drops). Old result files without a conf_level
+# column are treated as 95% rows.
+if ("conf_level" %in% names(saved)) {
+  saved <- saved[saved$conf_level == 0.95, ]
+}
 saved    <- saved[order(match(paste(saved$estimator, saved$method),
                               c("cfa wald_cfa", "htmt delta",
                                 "htmt perc", "htmt bc", "htmt bca"))), ]
@@ -49,6 +55,12 @@ rep <- replay_rep(task_id        = task_id,
                   run_battery    = TRUE)
 
 replayed <- rep$battery$ci
+if ("conf_level" %in% names(replayed)) {
+  replayed <- replayed[replayed$conf_level == 0.95, ]
+}
+replayed <- replayed[order(match(paste(replayed$estimator, replayed$method),
+                                 c("cfa wald_cfa", "htmt delta",
+                                   "htmt perc", "htmt bc", "htmt bca"))), ]
 
 compare <- data.frame(
   estimator      = saved$estimator,

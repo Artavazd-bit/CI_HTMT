@@ -72,20 +72,26 @@ calcovcov <- function(data) {
   return(vc_r)
 }
 
-# apply the delta method to the htmt
-HTMTDM <- function(data, nindicator, alpha = 0.05)
-{
-  starttime <- Sys.time()
+# Shared delta-method core: jacobian + omega + standard error.
+# Reused across multiple alphas without recomputation.
+HTMT_delta_se <- function(data, nindicator) {
   out <- HTMT_jacobian(data, use_cor = FALSE, nindicator)
-  htmtval <- out$htmt
-  gradient <- out$grad
   omega <- calcovcov(data)
-  se <- sqrt(t(gradient) %*% omega %*% gradient / nrow(data))[1]
-  upperbound <- htmtval + qnorm(p = 1 - (alpha/2), mean = 0, sd = 1)*se
-  lowerbound <- htmtval - qnorm(p = 1 - (alpha/2), mean = 0, sd = 1)*se 
-  endtime <- Sys.time()
-  tdelta <- endtime - starttime
-  
-  list(htmt = htmtval, se = se, lowerbound = lowerbound, upperbound = upperbound, time = tdelta)
+  se <- sqrt(t(out$grad) %*% omega %*% out$grad / nrow(data))[1]
+  list(htmt = out$htmt, se = se)
+}
+
+# Per-alpha extraction of the delta-method bounds from htmt + se.
+HTMTDM_ci <- function(htmt, se, alpha) {
+  z <- qnorm(p = 1 - (alpha / 2), mean = 0, sd = 1)
+  list(lowerbound = htmt - z * se, upperbound = htmt + z * se)
+}
+
+# Backward-compatible wrapper: full delta-method CI for one alpha.
+HTMTDM <- function(data, nindicator, alpha = 0.05) {
+  ds <- HTMT_delta_se(data, nindicator)
+  ci <- HTMTDM_ci(ds$htmt, ds$se, alpha)
+  list(htmt = ds$htmt, se = ds$se,
+       lowerbound = ci$lowerbound, upperbound = ci$upperbound)
 }
 
