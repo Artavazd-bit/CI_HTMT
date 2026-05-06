@@ -14,6 +14,7 @@ source("Rcode/generate_data.R")
 MASTER_SEED   <- 20260501L
 REPS_PER_TASK <- 100L
 NBOOT         <- 1000L
+CONF_LEVELS   <- c(0.90, 0.95, 0.99)
 
 task_id <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID", "1"))
 if (is.na(task_id) || task_id < 1L) stop("Invalid SLURM_ARRAY_TASK_ID: ", task_id)
@@ -84,12 +85,17 @@ for (k in seq_len(REPS_PER_TASK)) {
     msg <- paste0("generate_data: ", gen_err)
     res <- list(
       ci = data.frame(
-        estimator  = c("cfa", "htmt", "htmt", "htmt", "htmt"),
-        method     = c("wald_cfa", "delta", "perc", "bc", "bca"),
+        conf_level = rep(CONF_LEVELS, each = 5),
+        estimator  = rep(c("cfa", "htmt", "htmt", "htmt", "htmt"),
+                         times = length(CONF_LEVELS)),
+        method     = rep(c("wald_cfa", "delta", "perc", "bc", "bca"),
+                         times = length(CONF_LEVELS)),
         estimate   = NA_real_, lowerbound = NA_real_, upperbound = NA_real_,
+        time       = NA_real_,
         stringsAsFactors = FALSE
       ),
-      lrt = data.frame(chisq_diff = NA_real_, df_diff = NA_real_, p_diff = NA_real_),
+      lrt = data.frame(chisq_diff = NA_real_, df_diff = NA_real_,
+                       p_diff = NA_real_, time = NA_real_),
       errors = data.frame(
         estimator       = c("cfa", "htmt"),
         error_message   = msg,
@@ -98,7 +104,7 @@ for (k in seq_len(REPS_PER_TASK)) {
       )
     )
   } else {
-    res <- ci_battery(d, nboot = NBOOT)
+    res <- ci_battery(d, nboot = NBOOT, conf_levels = CONF_LEVELS)
   }
 
   if (length(gen_warns) > 0L) {

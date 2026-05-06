@@ -18,15 +18,28 @@ model_constrained <- '
                 xi_2 ~~ 1 * xi_2
                 '
                 
-cfa_one <- function(data, alpha = 0.05){
+cfa_one <- function(data){
+  t0 <- Sys.time()
   fit_uncon <- lavaan::cfa(model_unconstrained, data = data)
+  t_uncon <- as.numeric(Sys.time() - t0, units = "secs")
+
+  t1 <- Sys.time()
   fit_con <- lavaan::cfa(model_constrained, data = data)
-  
+  t_con <- as.numeric(Sys.time() - t1, units = "secs")
+
+  t2 <- Sys.time()
   lrt <- lavaan::lavTestLRT(fit_uncon, fit_con)
-  
-  pe  <- lavaan::parameterEstimates(fit_uncon, level = 1 - alpha)
-  row <- pe[pe$lhs == "xi_1" & pe$op == "~~" & pe$rhs == "xi_2", ]
-  
-  data.frame(cor_est = row$est, lowerbound = row$ci.lower, upperbound = row$ci.upper,
-             chisq_diff = lrt$`Chisq diff`[2], p_diff = lrt$`Pr(>Chisq)`[2], df_diff = lrt$`Df diff`[2])
+  t_lrt <- as.numeric(Sys.time() - t2, units = "secs")
+
+  list(
+    fit_uncon = fit_uncon,
+    t_uncon   = t_uncon,
+    t_con     = t_con,
+    t_lrt     = t_lrt,
+    lrt = list(
+      chisq_diff = lrt$`Chisq diff`[2],
+      df_diff    = lrt$`Df diff`[2],
+      p_diff     = lrt$`Pr(>Chisq)`[2]
+    )
+  )
 }

@@ -13,6 +13,10 @@ dfall <- do.call(rbind, lapply(ci_files, readRDS))
 message(sprintf("Loaded %d CI rows from %d task files (%d unique task_ids).",
                 nrow(dfall), length(ci_files), length(unique(dfall$task_id))))
 
+# Legacy result drops (pre-multi-conf-level) have no conf_level column; treat
+# them as 95% so old plots still render.
+if (!"conf_level" %in% names(dfall)) dfall$conf_level <- 0.95
+
 dfall$upperwithin <- dfall$correlation < dfall$upperbound
 dfall$lowerwithin <- dfall$correlation > dfall$lowerbound
 dfall$coverageone <- (1 > dfall$lowerbound) & (1 < dfall$upperbound)
@@ -20,7 +24,7 @@ dfall$coverageone <- (1 > dfall$lowerbound) & (1 < dfall$upperbound)
 dfall2 <- dfall[!is.na(dfall$lowerbound), ]
 
 resag <- dfall2 %>%
-  group_by(correlation, n, dtype, estimator, method) %>%
+  group_by(correlation, n, dtype, estimator, method, conf_level) %>%
   summarize(upperwithin = mean(upperwithin) * 100,
             lowerwithin = mean(lowerwithin) * 100,
             covagoneag  = mean(coverageone) * 100,
