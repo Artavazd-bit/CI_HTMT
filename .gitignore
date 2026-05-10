@@ -24,8 +24,8 @@
 #results
 results/
 
-#plots
-plots/
+#paper outputs (plots + tables)
+outputs/
 
 #registry
 registry/
