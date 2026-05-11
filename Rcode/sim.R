@@ -85,19 +85,24 @@ for (k in seq_len(REPS_PER_TASK)) {
     msg <- paste0("generate_data: ", gen_err)
     res <- list(
       ci = data.frame(
-        conf_level = rep(CONF_LEVELS, each = 5),
-        estimator  = rep(c("cfa", "htmt", "htmt", "htmt", "htmt"),
+        conf_level = rep(CONF_LEVELS, each = 6),
+        estimator  = rep(c("cfa", "cfa", "htmt", "htmt", "htmt", "htmt"),
                          times = length(CONF_LEVELS)),
-        method     = rep(c("wald_cfa", "delta", "perc", "bc", "bca"),
+        method     = rep(c("wald_cfa", "wald_cfa_robust",
+                           "delta", "perc", "bc", "bca"),
                          times = length(CONF_LEVELS)),
         estimate   = NA_real_, lowerbound = NA_real_, upperbound = NA_real_,
         time       = NA_real_,
         stringsAsFactors = FALSE
       ),
-      lrt = data.frame(chisq_diff = NA_real_, df_diff = NA_real_,
-                       p_diff = NA_real_, time = NA_real_),
+      lrt = data.frame(
+        method     = c("standard", "robust"),
+        chisq_diff = NA_real_, df_diff = NA_real_,
+        p_diff     = NA_real_, time    = NA_real_,
+        stringsAsFactors = FALSE
+      ),
       errors = data.frame(
-        estimator       = c("cfa", "htmt"),
+        estimator       = c("cfa", "cfa_robust", "htmt"),
         error_message   = msg,
         warning_message = NA_character_,
         stringsAsFactors = FALSE

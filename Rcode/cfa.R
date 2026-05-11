@@ -18,13 +18,13 @@ model_constrained <- '
                 xi_2 ~~ 1 * xi_2
                 '
                 
-cfa_one <- function(data){
+cfa_one <- function(data, estimator = "ML"){
   t0 <- Sys.time()
-  fit_uncon <- lavaan::cfa(model_unconstrained, data = data)
+  fit_uncon <- lavaan::cfa(model_unconstrained, data = data, estimator = estimator)
   t_uncon <- as.numeric(Sys.time() - t0, units = "secs")
 
   t1 <- Sys.time()
-  fit_con <- lavaan::cfa(model_constrained, data = data)
+  fit_con <- lavaan::cfa(model_constrained, data = data, estimator = estimator)
   t_con <- as.numeric(Sys.time() - t1, units = "secs")
 
   t2 <- Sys.time()

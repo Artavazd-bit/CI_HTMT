@@ -17,19 +17,33 @@ time_call <- function(expr) {
 ci_battery <- function(data, nboot = 1000, nindicator = 3,
                        conf_levels = c(0.90, 0.95, 0.99)) {
 
-  cfa_err   <- NA_character_
-  htmt_err  <- NA_character_
-  warns_cfa  <- character()
-  warns_htmt <- character()
+  cfa_err    <- NA_character_
+  cfa_r_err  <- NA_character_
+  htmt_err   <- NA_character_
+  warns_cfa   <- character()
+  warns_cfa_r <- character()
+  warns_htmt  <- character()
 
-  # ---- CFA block: shared across alphas (one fit per dataset) ----
+  # ---- CFA block (ML): shared across alphas (one fit per dataset) ----
   cfa_res <- withCallingHandlers(
     tryCatch(
-      cfa_one(data),
+      cfa_one(data, estimator = "ML"),
       error = function(e) { cfa_err <<- conditionMessage(e); NULL }
     ),
     warning = function(w) {
       warns_cfa <<- c(warns_cfa, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  # ---- CFA block (MLR / robust): shared across alphas ----
+  cfa_robust_res <- withCallingHandlers(
+    tryCatch(
+      cfa_one(data, estimator = "MLR"),
+      error = function(e) { cfa_r_err <<- conditionMessage(e); NULL }
+    ),
+    warning = function(w) {
+      warns_cfa_r <<- c(warns_cfa_r, conditionMessage(w))
       invokeRestart("muffleWarning")
     }
   )
@@ -61,7 +75,7 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
     cl    <- conf_levels[idx]
     alpha <- 1 - cl
 
-    # wald_cfa
+    # wald_cfa (ML)
     if (!is.null(cfa_res)) {
       tw <- time_call({
         pe  <- lavaan::parameterEstimates(cfa_res$fit_uncon, level = cl)
@@ -75,6 +89,22 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
     } else {
       cfa_est <- NA_real_; cfa_lo <- NA_real_; cfa_up <- NA_real_
       t_wald  <- NA_real_
+    }
+
+    # wald_cfa_robust (MLR)
+    if (!is.null(cfa_robust_res)) {
+      tw_r <- time_call({
+        pe_r <- lavaan::parameterEstimates(cfa_robust_res$fit_uncon, level = cl)
+        pe_r[pe_r$lhs == "xi_1" & pe_r$op == "~~" & pe_r$rhs == "xi_2", ]
+      })
+      row_r       <- tw_r$value
+      cfa_r_est   <- row_r$est
+      cfa_r_lo    <- row_r$ci.lower
+      cfa_r_up    <- row_r$ci.upper
+      t_wald_r    <- cfa_robust_res$t_uncon + tw_r$secs
+    } else {
+      cfa_r_est <- NA_real_; cfa_r_lo <- NA_real_; cfa_r_up <- NA_real_
+      t_wald_r  <- NA_real_
     }
 
     # delta / perc / bc / bca all derive from htmt_res
@@ -114,12 +144,12 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
 
     ci_rows[[idx]] <- data.frame(
       conf_level = cl,
-      estimator  = c("cfa",      "htmt",  "htmt", "htmt", "htmt"),
-      method     = c("wald_cfa", "delta", "perc", "bc",   "bca"),
-      estimate   = c(cfa_est, htmt_pe, htmt_pe, htmt_pe, htmt_pe),
-      lowerbound = c(cfa_lo,  delta_lo, perc_lo, bc_lo,  bca_lo),
-      upperbound = c(cfa_up,  delta_up, perc_up, bc_up,  bca_up),
-      time       = c(t_wald,  t_delta,  t_perc,  t_bc,   t_bca),
+      estimator  = c("cfa",      "cfa",             "htmt",  "htmt", "htmt", "htmt"),
+      method     = c("wald_cfa", "wald_cfa_robust", "delta", "perc", "bc",   "bca"),
+      estimate   = c(cfa_est,    cfa_r_est,         htmt_pe, htmt_pe, htmt_pe, htmt_pe),
+      lowerbound = c(cfa_lo,     cfa_r_lo,          delta_lo, perc_lo, bc_lo,  bca_lo),
+      upperbound = c(cfa_up,     cfa_r_up,          delta_up, perc_up, bc_up,  bca_up),
+      time       = c(t_wald,     t_wald_r,          t_delta,  t_perc,  t_bc,   t_bca),
       stringsAsFactors = FALSE
     )
   }
@@ -128,21 +158,31 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
   rownames(ci) <- NULL
 
   lrt <- data.frame(
-    chisq_diff = if (!is.null(cfa_res)) cfa_res$lrt$chisq_diff else NA_real_,
-    df_diff    = if (!is.null(cfa_res)) cfa_res$lrt$df_diff    else NA_real_,
-    p_diff     = if (!is.null(cfa_res)) cfa_res$lrt$p_diff     else NA_real_,
-    time       = if (!is.null(cfa_res))
-                   cfa_res$t_uncon + cfa_res$t_con + cfa_res$t_lrt
-                 else NA_real_
+    method     = c("standard", "robust"),
+    chisq_diff = c(if (!is.null(cfa_res))        cfa_res$lrt$chisq_diff        else NA_real_,
+                   if (!is.null(cfa_robust_res)) cfa_robust_res$lrt$chisq_diff else NA_real_),
+    df_diff    = c(if (!is.null(cfa_res))        cfa_res$lrt$df_diff        else NA_real_,
+                   if (!is.null(cfa_robust_res)) cfa_robust_res$lrt$df_diff else NA_real_),
+    p_diff     = c(if (!is.null(cfa_res))        cfa_res$lrt$p_diff        else NA_real_,
+                   if (!is.null(cfa_robust_res)) cfa_robust_res$lrt$p_diff else NA_real_),
+    time       = c(if (!is.null(cfa_res))
+                     cfa_res$t_uncon + cfa_res$t_con + cfa_res$t_lrt
+                   else NA_real_,
+                   if (!is.null(cfa_robust_res))
+                     cfa_robust_res$t_uncon + cfa_robust_res$t_con + cfa_robust_res$t_lrt
+                   else NA_real_),
+    stringsAsFactors = FALSE
   )
 
   errors <- data.frame(
-    estimator       = c("cfa", "htmt"),
-    error_message   = c(cfa_err, htmt_err),
-    warning_message = c(collapse_warns(warns_cfa), collapse_warns(warns_htmt)),
-    n_boot_valid    = c(NA_integer_,
+    estimator       = c("cfa", "cfa_robust", "htmt"),
+    error_message   = c(cfa_err, cfa_r_err, htmt_err),
+    warning_message = c(collapse_warns(warns_cfa),
+                        collapse_warns(warns_cfa_r),
+                        collapse_warns(warns_htmt)),
+    n_boot_valid    = c(NA_integer_, NA_integer_,
                         if (!is.null(htmt_res)) htmt_res$n_boot_valid else NA_integer_),
-    n_jack_valid    = c(NA_integer_,
+    n_jack_valid    = c(NA_integer_, NA_integer_,
                         if (!is.null(htmt_res)) htmt_res$n_jack_valid else NA_integer_),
     stringsAsFactors = FALSE
   )
