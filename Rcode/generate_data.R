@@ -15,8 +15,8 @@ generate_data <- function(n,
     ))
   }
   
-  fit <- sem(population_model, do.fit = FALSE)
-  popcov <- lavInspect(fit, "implied")$cov
+  fit <- lavaan::sem(population_model, do.fit = FALSE)
+  popcov <- lavaan::lavInspect(fit, "implied")$cov
   
   res <- covsim::rPLSIM(
     N = n,
