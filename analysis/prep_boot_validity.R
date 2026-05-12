@@ -6,7 +6,7 @@ library(dplyr)
 # tail because the missing-count distribution is highly skewed (median 0,
 # but max up to ~983 in n=25, severe conditions).
 
-ERR_DIR <- "results/results_2026_05_06_time_ci/errors"
+ERR_DIR <- "results/results_2026_05_11/errors"
 NBOOT <- 1000L
 
 # Single source of truth for the bin definitions (label + predicate).

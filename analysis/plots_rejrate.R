@@ -5,7 +5,7 @@ library(ggplot2)
 #   method2 (factor), covagoneag (coverage of phi=1 in %, 0-100),
 #   conf_level (numeric, e.g. 0.90, 0.95, 0.99)
 
-dir.create("outputs/plots", recursive = TRUE, showWarnings = FALSE)
+dir.create("outputs/plots_robust", recursive = TRUE, showWarnings = FALSE)
 
 PRACTICAL_HLINE <- 80 # practical-significance reference for phi < 1
 y_breaks <- seq(0, 100, by = 10)
@@ -32,7 +32,7 @@ for (cl in sort(unique(resag$conf_level))) {
       scale_linetype_discrete(name = "Type of CI:") +
       scale_shape_discrete(name = "Type of CI:")
 
-    ggsave(sprintf("outputs/plots/rejrate_%s_%s.png", dt, cl_tag),
+    ggsave(sprintf("outputs/plots_robust/rejrate_%s_%s.png", dt, cl_tag),
            plot = p, width = 15.375, height = 4.48)
   }
 }

@@ -9,7 +9,7 @@ library(dplyr)
 #
 # is.na() in R is TRUE for both NA and NaN, so BCa NaN bounds count here.
 
-CI_DIR <- "results/results_2026_05_06_time_ci/ci"
+CI_DIR <- "results/results_2026_05_11/ci"
 
 ci_files <- list.files(CI_DIR, pattern = "\\.rds$", full.names = TRUE)
 if (length(ci_files) == 0L) stop("No .rds files found in CI_DIR: ", CI_DIR)
@@ -20,20 +20,23 @@ message(sprintf("Loaded %d CI rows from %d task files (%d unique task_ids).",
                 nrow(dfall), length(ci_files), length(unique(dfall$task_id))))
 
 # --- Problem 1: estimator failures -------------------------------------------
-# Within a rep, the estimate is repeated across (method, conf_level), so
-# collapse to one row per (rep x estimator) before counting.
+# Within a rep, the estimate is repeated across conf_level for a given
+# (estimator, method), so collapse to one row per (rep x estimator x method)
+# before counting. ML and MLR CFA can fail independently, so we keep `method`
+# in the grouping. For HTMT all four methods share one point estimate, so the
+# four resulting rows per condition are identical -- table consumers can dedupe.
 est_per_rep <- dfall %>%
   group_by(task_id, condition_id, rep_in_batch,
-           correlation, n, dtype, estimator) %>%
+           correlation, n, dtype, estimator, method) %>%
   summarize(estimate = first(estimate), .groups = "drop")
 
 problem_estimates <- est_per_rep %>%
-  group_by(correlation, n, dtype, estimator) %>%
+  group_by(correlation, n, dtype, estimator, method) %>%
   summarize(n_reps     = n(),
             n_failed   = sum(is.na(estimate)),
             pct_failed = 100 * n_failed / n_reps,
             .groups    = "drop") %>%
-  arrange(desc(pct_failed), correlation, n, dtype, estimator)
+  arrange(desc(pct_failed), correlation, n, dtype, estimator, method)
 
 # --- Problem 2: bound failures (conditional on estimate being present) -------
 problem_bounds <- dfall %>%

@@ -24,14 +24,19 @@ time_relpct_wide <- time_resag %>%
 OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-method_order <- c("delta", "perc", "bc", "bca")
-relpct_tab <- time_relpct_wide %>%
-              select(n, all_of(method_order)) %>%
-              arrange(n)
+# Drop methods that aren't in this result drop (e.g., wald_cfa_robust is absent
+# in pre-robust result files); keep the canonical order otherwise.
+method_order <- c("wald_cfa_robust", "delta", "perc", "bc", "bca")
+header_map   <- c(wald_cfa_robust = "CFA-MLR", delta = "Asymptotic",
+                  perc = "Percentile", bc = "BC", bca = "BCa")
+present      <- method_order[method_order %in% names(time_relpct_wide)]
+relpct_tab   <- time_relpct_wide %>%
+                select(n, all_of(present)) %>%
+                arrange(n)
 
-col_headers <- c("$n$", "Asymptotic", "Percentile", "BC", "BCa")
-align       <- c("r", "r", "r", "r", "r")
-fmt         <- c("%d", "%.1f", "%.1f", "%.1f", "%.1f")
+col_headers <- c("$n$", header_map[present])
+align       <- rep("r", length(present) + 1L)
+fmt         <- c("%d", rep("%.1f", length(present)))
 
 body <- vapply(seq_len(nrow(relpct_tab)), function(i) {
   cells <- vapply(seq_len(ncol(relpct_tab)), function(j) {
@@ -44,12 +49,13 @@ body <- vapply(seq_len(nrow(relpct_tab)), function(i) {
 lines <- c(
   "\\begin{table}[htbp]",
   "\\centering",
-  paste("\\caption{Mean per-replication compute time of each HTMT confidence",
-        "interval method relative to the Wald-CFA baseline, expressed as a",
+  paste("\\caption{Mean per-replication compute time of each confidence",
+        "interval method relative to the ML Wald-CFA baseline, expressed as a",
         "percentage difference: $(t_{\\text{method}} - t_{\\text{wald\\_cfa}})",
-        " / t_{\\text{wald\\_cfa}} \\times 100$. Means are taken over all",
-        "replications at $\\alpha = 0.05$, grouped by sample size $n$.",
-        "Positive values indicate slower than the baseline.}"),
+        " / t_{\\text{wald\\_cfa}} \\times 100$. CFA-MLR is the robust",
+        "(MLR-fitted) Wald CI; the remaining four are the HTMT-based methods.",
+        "Means are taken over all replications at $\\alpha = 0.05$, grouped by",
+        "sample size $n$. Positive values indicate slower than the baseline.}"),
   "\\label{tab:relative-time-vs-wald}",
   sprintf("\\begin{tabular}{%s}", paste(align, collapse = "")),
   "\\toprule",

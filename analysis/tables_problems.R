@@ -6,7 +6,15 @@ OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 # --- problem_estimates: keep all rows with at least one failure --------------
-pe <- problem_estimates %>% filter(n_failed > 0)
+# HTMT methods (delta/perc/bc/bca) share a single point estimate, so each rep
+# produces four identical rows in problem_estimates -- collapse them to one
+# row per (condition x htmt). CFA's two methods (wald_cfa / wald_cfa_robust)
+# can fail independently because ML and MLR are separate fits, so keep both.
+pe <- problem_estimates %>%
+  mutate(method = ifelse(estimator == "htmt", NA_character_, method)) %>%
+  distinct(correlation, n, dtype, estimator, method,
+           n_reps, n_failed, pct_failed) %>%
+  filter(n_failed > 0)
 
 # --- problem_bounds: collapse conf_level (counts are identical across alphas) -
 pb_check <- problem_bounds %>%
@@ -73,6 +81,7 @@ pe_tab <- pe %>%
             `$n$`            = n,
             Distribution     = dtype,
             Estimator        = estimator,
+            Method           = ifelse(is.na(method), "--", method),
             `$N_{\\text{fail}}$` = n_failed,
             `\\% failed`     = pct_failed)
 
@@ -80,12 +89,14 @@ write_latex_table(
   pe_tab,
   file    = file.path(OUT_DIR, "problem_estimates.tex"),
   caption = paste("Replications in which the point estimate could not be",
-                  "computed, by condition and estimator. Rates are over",
-                  "1{,}000 replications per condition. Conditions with no",
-                  "failures are omitted."),
+                  "computed, by condition, estimator, and (for CFA) fitting",
+                  "method (ML vs MLR). HTMT shares one point estimate across",
+                  "all four CI methods, so its row carries `--' for Method.",
+                  "Rates are over 1{,}000 replications per condition.",
+                  "Conditions with no failures are omitted."),
   label   = "tab:problem-estimates",
-  align   = c("r", "r", "l", "l", "r", "r"),
-  fmt     = c("%.2f", "%d", "s", "s", "%d", "%.1f")
+  align   = c("r", "r", "l", "l", "l", "r", "r"),
+  fmt     = c("%.2f", "%d", "s", "s", "s", "%d", "%.1f")
 )
 
 # --- problem_bounds table ----------------------------------------------------
