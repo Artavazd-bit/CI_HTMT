@@ -6,7 +6,7 @@ library(patchwork)
 #   method2 (factor), upperwithin, lowerwithin (both percentages 0-100),
 #   conf_level (numeric, e.g. 0.90, 0.95, 0.99)
 
-dir.create("outputs/plots_robust", recursive = TRUE, showWarnings = FALSE)
+dir.create("outputs/plots", recursive = TRUE, showWarnings = FALSE)
 
 # One-sided nominal coverage as a function of conf level cl:
 #   nominal upper = cl + (1 - cl)/2 = (1 + cl) / 2
@@ -46,9 +46,9 @@ make_popcov_plot <- function(resag, dtype_sel, lowertick, nominal) {
 }
 
 popcov_specs <- list(
-  list(dtype = "severe",   lowertick = 60, file_stem = "outputs/plots_robust/popcov_severe"),
-  list(dtype = "moderate", lowertick = 60, file_stem = "outputs/plots_robust/popcov_moderate"),
-  list(dtype = "normal",   lowertick = 80, file_stem = "outputs/plots_robust/popcov_normal")
+  list(dtype = "severe",   lowertick = 60, file_stem = "outputs/plots/popcov_severe"),
+  list(dtype = "moderate", lowertick = 60, file_stem = "outputs/plots/popcov_moderate"),
+  list(dtype = "normal",   lowertick = 80, file_stem = "outputs/plots/popcov_normal")
 )
 
 for (cl in sort(unique(resag$conf_level))) {

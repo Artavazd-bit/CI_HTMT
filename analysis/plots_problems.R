@@ -1,9 +1,9 @@
 library(dplyr)
 library(ggplot2)
 
-source("analysis/prep_problems.R")
+if (!exists("problem_estimates", inherits = FALSE)) source("analysis/prep_problems.R")
 
-OUT_DIR <- "outputs/plots_robust"
+OUT_DIR <- "outputs/plots"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 # Collapse HTMT's four identical method rows to one (delta/perc/bc/bca share a

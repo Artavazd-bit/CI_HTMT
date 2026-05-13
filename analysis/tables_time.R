@@ -1,6 +1,8 @@
 library(dplyr)
 library(tidyverse)
 
+if (!exists("dfall2", inherits = FALSE)) source("analysis/prep_ci.R")
+
 dfall95 <- dfall2[dfall2$conf_level == 0.95,]
 
 time_resag <- dfall95 %>%

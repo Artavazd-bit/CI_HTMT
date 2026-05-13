@@ -2,24 +2,57 @@ library(dplyr)
 
 # Builds `resag`, consumed by analysis/plots_popcov.R and analysis/plots_rejrate.R.
 
-CI_DIR <- "results/results_2026_05_11/ci"
+if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_13"
+CI_DIR  <- file.path(RESULTS_DIR, "ci")
+ERR_DIR <- file.path(RESULTS_DIR, "errors")
 
 ci_files <- list.files(CI_DIR, pattern = "\\.rds$", full.names = TRUE)
 if (length(ci_files) == 0L) stop("No .rds files found in CI_DIR: ", CI_DIR)
 
-dfall <- do.call(rbind, lapply(ci_files, readRDS))
+err_files <- list.files(ERR_DIR, pattern = "\\.rds$", full.names = TRUE)
+if (length(err_files) == 0L) stop("No .rds files found in ERR_DIR: ", ERR_DIR)
+
+dfall  <- do.call(rbind, lapply(ci_files,  readRDS))
+errall <- do.call(rbind, lapply(err_files, readRDS))
 
 message(sprintf("Loaded %d CI rows from %d task files (%d unique task_ids).",
                 nrow(dfall), length(ci_files), length(unique(dfall$task_id))))
 
+# Map CI method -> estimator group so the join key matches errall$estimator.
+ci_estimator_grp <- c(wald_cfa = "cfa", wald_cfa_robust = "cfa_robust",
+                      delta = "htmt", perc = "htmt", bc = "htmt", bca = "htmt")
+dfall$estimator_grp <- ci_estimator_grp[dfall$method]
+
+# Left-join errors onto CI on (task_id, rep_in_batch, estimator_grp). One-to-many
+# fan-out: one HTMT error row -> 12 CI rows (4 methods x 3 conf_levels) for that
+# rep; one CFA-flavour error row -> 3 CI rows (1 method x 3 conf_levels).
+err_join <- errall[, c("task_id", "rep_in_batch", "estimator",
+                       "error_message", "warning_message")]
+names(err_join)[names(err_join) == "estimator"] <- "estimator_grp"
+dfall <- merge(dfall, err_join,
+               by = c("task_id", "rep_in_batch", "estimator_grp"),
+               all.x = TRUE, sort = FALSE)
 
 dfall$upperwithin <- dfall$correlation < dfall$upperbound
 dfall$lowerwithin <- dfall$correlation > dfall$lowerbound
 dfall$coverageone <- (1 > dfall$lowerbound) & (1 < dfall$upperbound)
 
-dfall2 <- dfall[is.finite(dfall$estimate) &
-                is.finite(dfall$lowerbound) &
-                is.finite(dfall$upperbound), ]
+# Clean-rep filter: require finite estimate + bounds; for CFA/CFA-MLR drop on
+# any error OR warning; for HTMT drop only on hard errors (the "Negative mean
+# inside sqrt()" jackknife warning is benign as long as the bounds computed).
+# Per-row (not per-rep) drop so e.g. a NaN-BCa bound doesn't take delta/perc/bc
+# down with it when those produced finite bounds for the same rep.
+err_clean <- ifelse(dfall$estimator_grp == "htmt",
+                    is.na(dfall$error_message),
+                    is.na(dfall$error_message) & is.na(dfall$warning_message))
+finite_ok <- is.finite(dfall$estimate) &
+             is.finite(dfall$lowerbound) &
+             is.finite(dfall$upperbound)
+dfall2 <- dfall[err_clean & finite_ok, ]
+
+message(sprintf(
+  "Clean rows: %d (dropped %d on error/warning; %d further on non-finite bounds).",
+  nrow(dfall2), sum(!err_clean), sum(err_clean & !finite_ok)))
 
 resag <- dfall2 %>%
   group_by(correlation, n, dtype, method, conf_level) %>%

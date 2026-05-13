@@ -1,5 +1,6 @@
 library(dplyr)
-ERR_DIR <- "results/results_2026_05_06_time_ci/errors"
+if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_13"
+ERR_DIR <- file.path(RESULTS_DIR, "errors")
 ef <- list.files(ERR_DIR, pattern = "\\.rds$", full.names = TRUE)
 errall <- do.call(rbind, lapply(ef, readRDS))
 htmt <- errall[errall[["estimator"]] == "htmt", ]

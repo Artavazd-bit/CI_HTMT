@@ -9,7 +9,8 @@ library(dplyr)
 #
 # is.na() in R is TRUE for both NA and NaN, so BCa NaN bounds count here.
 
-CI_DIR <- "results/results_2026_05_11/ci"
+if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_13"
+CI_DIR <- file.path(RESULTS_DIR, "ci")
 
 ci_files <- list.files(CI_DIR, pattern = "\\.rds$", full.names = TRUE)
 if (length(ci_files) == 0L) stop("No .rds files found in CI_DIR: ", CI_DIR)
