@@ -52,12 +52,12 @@ bv_tab <- bv %>%
             `$n$`            = n,
             Distribution     = dtype,
             `0`        = .data[["0"]],
-            `1--10`    = .data[["1-10"]],
-            `11--25`   = .data[["11-25"]],
+            `1--25`    = .data[["1-25"]],
             `26--50`   = .data[["26-50"]],
-            `51--100`  = .data[["51-100"]],
-            `101--250` = .data[["101-250"]],
-            `251--1000` = .data[["251-1000"]])
+            `51--100`   = .data[["51-100"]],
+            `101--500`  = .data[["101-500"]],
+            `501--750` = .data[["501-750"]],
+            `751--1000` = .data[["751-1000"]])
 
 write_latex_table(
   bv_tab,
@@ -76,4 +76,4 @@ write_latex_table(
 )
 
 message(sprintf("Wrote %s (%d rows).",
-                file.path(OUT_DIR, "boot_validity.tex"), nrow(bv_tab)))
+                file.path(OUT_DIR, "boot_validity_v2.tex"), nrow(bv_tab)))

@@ -7,6 +7,18 @@ collapse_warns <- function(w) {
   paste(unique(w), collapse = " || ")
 }
 
+# Combine the three per-scope error/warning strings from a cfa_one() result
+# into a single message with "uncon:" / "con:" / "lrt:" prefixes, skipping
+# empty scopes. Returns NA_character_ if all three are empty.
+combine_cfa_msgs <- function(uncon, con, lrt) {
+  parts <- c(
+    if (!is.na(uncon) && nzchar(uncon)) paste0("uncon: ", uncon),
+    if (!is.na(con)   && nzchar(con))   paste0("con: ",   con),
+    if (!is.na(lrt)   && nzchar(lrt))   paste0("lrt: ",   lrt)
+  )
+  if (length(parts) == 0L) NA_character_ else paste(parts, collapse = " || ")
+}
+
 # Time a single expression; returns list(value, secs).
 time_call <- function(expr) {
   t0 <- Sys.time()
@@ -17,36 +29,14 @@ time_call <- function(expr) {
 ci_battery <- function(data, nboot = 1000, nindicator = 3,
                        conf_levels = c(0.90, 0.95, 0.99)) {
 
-  cfa_err    <- NA_character_
-  cfa_r_err  <- NA_character_
   htmt_err   <- NA_character_
-  warns_cfa   <- character()
-  warns_cfa_r <- character()
-  warns_htmt  <- character()
+  warns_htmt <- character()
 
-  # ---- CFA block (ML): shared across alphas (one fit per dataset) ----
-  cfa_res <- withCallingHandlers(
-    tryCatch(
-      cfa_one(data, estimator = "ML"),
-      error = function(e) { cfa_err <<- conditionMessage(e); NULL }
-    ),
-    warning = function(w) {
-      warns_cfa <<- c(warns_cfa, conditionMessage(w))
-      invokeRestart("muffleWarning")
-    }
-  )
-
-  # ---- CFA block (MLR / robust): shared across alphas ----
-  cfa_robust_res <- withCallingHandlers(
-    tryCatch(
-      cfa_one(data, estimator = "MLR"),
-      error = function(e) { cfa_r_err <<- conditionMessage(e); NULL }
-    ),
-    warning = function(w) {
-      warns_cfa_r <<- c(warns_cfa_r, conditionMessage(w))
-      invokeRestart("muffleWarning")
-    }
-  )
+  # ---- CFA blocks: cfa_one handles per-step errors internally and never
+  # throws, so the valid uncon point estimate survives a downstream LRT
+  # failure (Heywood-driven NA in the SB scaling factor).
+  cfa_res        <- cfa_one(data, estimator = "ML")
+  cfa_robust_res <- cfa_one(data, estimator = "MLR")
 
   # ---- HTMT block: shared across alphas ----
   # Compute delta-method core (htmt point estimate + SE), bootstrap, and
@@ -75,8 +65,8 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
     cl    <- conf_levels[idx]
     alpha <- 1 - cl
 
-    # wald_cfa (ML)
-    if (!is.null(cfa_res)) {
+    # wald_cfa (ML) — keyed on the uncon fit, independent of con/LRT outcome.
+    if (!is.null(cfa_res$fit_uncon)) {
       tw <- time_call({
         pe  <- lavaan::parameterEstimates(cfa_res$fit_uncon, level = cl)
         pe[pe$lhs == "xi_1" & pe$op == "~~" & pe$rhs == "xi_2", ]
@@ -92,7 +82,7 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
     }
 
     # wald_cfa_robust (MLR)
-    if (!is.null(cfa_robust_res)) {
+    if (!is.null(cfa_robust_res$fit_uncon)) {
       tw_r <- time_call({
         pe_r <- lavaan::parameterEstimates(cfa_robust_res$fit_uncon, level = cl)
         pe_r[pe_r$lhs == "xi_1" & pe_r$op == "~~" & pe_r$rhs == "xi_2", ]
@@ -157,28 +147,36 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
   ci <- do.call(rbind, ci_rows)
   rownames(ci) <- NULL
 
+  lrt_ml  <- cfa_res$lrt
+  lrt_mlr <- cfa_robust_res$lrt
   lrt <- data.frame(
     method     = c("standard", "robust"),
-    chisq_diff = c(if (!is.null(cfa_res))        cfa_res$lrt$chisq_diff        else NA_real_,
-                   if (!is.null(cfa_robust_res)) cfa_robust_res$lrt$chisq_diff else NA_real_),
-    df_diff    = c(if (!is.null(cfa_res))        cfa_res$lrt$df_diff        else NA_real_,
-                   if (!is.null(cfa_robust_res)) cfa_robust_res$lrt$df_diff else NA_real_),
-    p_diff     = c(if (!is.null(cfa_res))        cfa_res$lrt$p_diff        else NA_real_,
-                   if (!is.null(cfa_robust_res)) cfa_robust_res$lrt$p_diff else NA_real_),
-    time       = c(if (!is.null(cfa_res))
-                     cfa_res$t_uncon + cfa_res$t_con + cfa_res$t_lrt
-                   else NA_real_,
-                   if (!is.null(cfa_robust_res))
-                     cfa_robust_res$t_uncon + cfa_robust_res$t_con + cfa_robust_res$t_lrt
-                   else NA_real_),
+    chisq_diff = c(if (!is.null(lrt_ml))  lrt_ml$chisq_diff  else NA_real_,
+                   if (!is.null(lrt_mlr)) lrt_mlr$chisq_diff else NA_real_),
+    df_diff    = c(if (!is.null(lrt_ml))  lrt_ml$df_diff     else NA_real_,
+                   if (!is.null(lrt_mlr)) lrt_mlr$df_diff    else NA_real_),
+    p_diff     = c(if (!is.null(lrt_ml))  lrt_ml$p_diff      else NA_real_,
+                   if (!is.null(lrt_mlr)) lrt_mlr$p_diff     else NA_real_),
+    time       = c(cfa_res$t_uncon        + cfa_res$t_con        + cfa_res$t_lrt,
+                   cfa_robust_res$t_uncon + cfa_robust_res$t_con + cfa_robust_res$t_lrt),
     stringsAsFactors = FALSE
   )
 
   errors <- data.frame(
     estimator       = c("cfa", "cfa_robust", "htmt"),
-    error_message   = c(cfa_err, cfa_r_err, htmt_err),
-    warning_message = c(collapse_warns(warns_cfa),
-                        collapse_warns(warns_cfa_r),
+    error_message   = c(combine_cfa_msgs(cfa_res$err_uncon,
+                                         cfa_res$err_con,
+                                         cfa_res$err_lrt),
+                        combine_cfa_msgs(cfa_robust_res$err_uncon,
+                                         cfa_robust_res$err_con,
+                                         cfa_robust_res$err_lrt),
+                        htmt_err),
+    warning_message = c(combine_cfa_msgs(collapse_warns(cfa_res$warns_uncon),
+                                         collapse_warns(cfa_res$warns_con),
+                                         collapse_warns(cfa_res$warns_lrt)),
+                        combine_cfa_msgs(collapse_warns(cfa_robust_res$warns_uncon),
+                                         collapse_warns(cfa_robust_res$warns_con),
+                                         collapse_warns(cfa_robust_res$warns_lrt)),
                         collapse_warns(warns_htmt)),
     n_boot_valid    = c(NA_integer_, NA_integer_,
                         if (!is.null(htmt_res)) htmt_res$n_boot_valid else NA_integer_),

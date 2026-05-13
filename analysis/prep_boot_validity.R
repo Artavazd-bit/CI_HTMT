@@ -10,14 +10,23 @@ ERR_DIR <- "results/results_2026_05_11/errors"
 NBOOT <- 1000L
 
 # Single source of truth for the bin definitions (label + predicate).
+#BIN_SPECS <- list(
+#  list(label = "0",        test = function(x) x == 0),
+#  list(label = "1-10",     test = function(x) x >=   1 & x <=   10),
+#  list(label = "11-25",    test = function(x) x >=  11 & x <=   25),
+#  list(label = "26-50",    test = function(x) x >=  26 & x <=   50),
+#  list(label = "51-100",   test = function(x) x >=  51 & x <=  100),
+#  list(label = "101-250",  test = function(x) x >= 101 & x <=  250),
+#  list(label = "251-1000", test = function(x) x >= 251 & x <= 1000)
+#)
 BIN_SPECS <- list(
   list(label = "0",        test = function(x) x == 0),
-  list(label = "1-10",     test = function(x) x >=   1 & x <=   10),
-  list(label = "11-25",    test = function(x) x >=  11 & x <=   25),
+  list(label = "1-25",     test = function(x) x >=   1 & x <=   25),
   list(label = "26-50",    test = function(x) x >=  26 & x <=   50),
-  list(label = "51-100",   test = function(x) x >=  51 & x <=  100),
-  list(label = "101-250",  test = function(x) x >= 101 & x <=  250),
-  list(label = "251-1000", test = function(x) x >= 251 & x <= 1000)
+  list(label = "51-100",    test = function(x) x >=  51 & x <=  100),
+  list(label = "101-500",   test = function(x) x >=  101 & x <=  500),
+  list(label = "501-750",  test = function(x) x >= 501 & x <=  750),
+  list(label = "751-1000", test = function(x) x >= 751 & x <= 1000)
 )
 BIN_LABELS <- vapply(BIN_SPECS, `[[`, character(1), "label")
 
