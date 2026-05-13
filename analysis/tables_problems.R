@@ -1,6 +1,6 @@
 library(dplyr)
 
-source("analysis/prep_problems.R")
+if (!exists("problem_estimates", inherits = FALSE)) source("analysis/prep_problems.R")
 
 OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)

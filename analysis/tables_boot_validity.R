@@ -1,6 +1,6 @@
 library(dplyr)
 
-source("analysis/prep_boot_validity.R")
+if (!exists("boot_validity", inherits = FALSE)) source("analysis/prep_boot_validity.R")
 
 OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
