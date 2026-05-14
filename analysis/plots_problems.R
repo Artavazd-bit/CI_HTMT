@@ -1,43 +1,37 @@
-library(dplyr)
 library(ggplot2)
 
-if (!exists("problem_estimates", inherits = FALSE)) source("analysis/prep_problems.R")
+if (!exists("problems", inherits = FALSE)) source("analysis/prep_problems.R")
 
 OUT_DIR <- "outputs/plots"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-# Collapse HTMT's four identical method rows to one (delta/perc/bc/bca share a
-# single point estimate); keep CFA's ML and MLR as separate series since they
-# fail independently. Unlike `pe` in tables_problems.R we keep zero-failure
-# rows so each series spans the full sample-size axis.
-pe_plot <- problem_estimates %>%
-  mutate(method = ifelse(estimator == "htmt", NA_character_, method)) %>%
-  distinct(correlation, n, dtype, estimator, method, pct_failed) %>%
-  mutate(
-    series = factor(case_when(
-      estimator == "htmt"         ~ "HTMT",
-      method    == "wald_cfa"        ~ "CFA (ML)",
-      method    == "wald_cfa_robust" ~ "CFA (MLR)"
-    ), levels = c("HTMT", "CFA (ML)", "CFA (MLR)")),
-    correlation = factor(sprintf("Phi == %.2f", correlation)),
-    dtype       = factor(dtype, levels = c("normal", "moderate", "severe"))
-  )
+dtype_labeller <- c(normal   = "normal",
+                    moderate = "moderately non-normal",
+                    severe   = "severely non-normal")
 
-p <- ggplot(pe_plot, aes(x = as.factor(n), y = pct_failed, group = series)) +
-  geom_line(aes(linetype = series)) +
-  geom_point(aes(shape = series)) +
-  facet_grid(rows = vars(dtype), cols = vars(correlation),
-             labeller = labeller(
-               correlation = label_parsed,
-               dtype = c(normal   = "normal",
-                         moderate = "moderately non-normal",
-                         severe   = "severely non-normal")
-             )) +
-  scale_y_continuous(name = "Estimate failure rate (%)") +
-  labs(x = "Sample size") +
-  scale_linetype_discrete(name = "Estimator:") +
-  scale_shape_discrete(name = "Estimator:") +
-  theme(legend.position = "bottom")
+make_problems_plot <- function(d) {
+  ggplot(d, aes(x = as.factor(n), y = pct_problem, group = method2)) +
+    geom_line(aes(linetype = method2)) +
+    geom_point(aes(shape = method2)) +
+    facet_grid(rows = vars(dtype), cols = vars(correlation_lbl),
+               labeller = labeller(correlation_lbl = label_parsed,
+                                   dtype = dtype_labeller)) +
+    scale_y_continuous(name = "Estimate or bound failure rate (%)") +
+    labs(x = "Sample size") +
+    scale_linetype_discrete(name = "Type of CI:") +
+    scale_shape_discrete(name = "Type of CI:") +
+    theme_minimal() +
+    theme(legend.position = "bottom")
+}
 
-ggsave(file.path(OUT_DIR, "problem_estimates.png"),
-       plot = p, width = 15.375, height = 9.15625)
+problems_plot <- problems
+problems_plot$dtype <- factor(problems_plot$dtype,
+                              levels = c("normal", "moderate", "severe"))
+
+for (cl in sort(unique(problems_plot$conf_level))) {
+  d <- problems_plot[problems_plot$conf_level == cl, ]
+  p <- make_problems_plot(d)
+  cl_tag <- sprintf("cl%02d", round(cl * 100))
+  ggsave(file.path(OUT_DIR, sprintf("problems_%s.png", cl_tag)),
+         plot = p, width = 15.375, height = 9.15625)
+}

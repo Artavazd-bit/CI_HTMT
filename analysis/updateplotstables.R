@@ -21,7 +21,6 @@ scripts <- c(
   "analysis/tables_time.R",
   "analysis/prep_problems.R",
   "analysis/plots_problems.R",
-  "analysis/tables_problems.R",
   "analysis/prep_boot_validity.R",
   "analysis/tables_boot_validity.R"
 )

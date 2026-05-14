@@ -2,7 +2,7 @@ library(dplyr)
 
 # Builds `resag`, consumed by analysis/plots_popcov.R and analysis/plots_rejrate.R.
 
-if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_13"
+if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_14"
 CI_DIR  <- file.path(RESULTS_DIR, "ci")
 ERR_DIR <- file.path(RESULTS_DIR, "errors")
 
@@ -26,9 +26,10 @@ dfall$estimator_grp <- ci_estimator_grp[dfall$method]
 # Left-join errors onto CI on (task_id, rep_in_batch, estimator_grp). One-to-many
 # fan-out: one HTMT error row -> 12 CI rows (4 methods x 3 conf_levels) for that
 # rep; one CFA-flavour error row -> 3 CI rows (1 method x 3 conf_levels).
-err_join <- errall[, c("task_id", "rep_in_batch", "estimator",
+err_join <- errall[errall$scope == "uncon" | is.na(errall$scope), c("task_id", "rep_in_batch", "estimator",
                        "error_message", "warning_message")]
-names(err_join)[names(err_join) == "estimator"] <- "estimator_grp"
+err_join <- dplyr::rename(err_join, estimator_grp = estimator)
+# left join
 dfall <- merge(dfall, err_join,
                by = c("task_id", "rep_in_batch", "estimator_grp"),
                all.x = TRUE, sort = FALSE)
