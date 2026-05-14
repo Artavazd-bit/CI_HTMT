@@ -10,7 +10,7 @@ HTMT <- function(data, use_cor = FALSE, nindicator){
   m1 <- mean(S[i,i][lower.tri(S[i,i])])
   m2 <- mean(S[-i,-i][lower.tri(S[-i,-i])])
   if(m1*m2 < 0 ){
-    warning("Negative value inside sqrt()")
+    warning("Negative mean inside sqrt()")
   }
   mean(S[i,-i]) / sqrt(m1 * m2)
 }
