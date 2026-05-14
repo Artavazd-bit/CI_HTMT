@@ -12,7 +12,7 @@ if (!file.exists("CI_HTMT.Rproj")) {
        getwd())
 }
 
-RESULTS_DIR <- "results/results_2026_05_13"
+RESULTS_DIR <- "results/results_2026_05_14"
 
 scripts <- c(
   "analysis/prep_ci.R",
