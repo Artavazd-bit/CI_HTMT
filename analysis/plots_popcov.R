@@ -46,9 +46,9 @@ make_popcov_plot <- function(resag, dtype_sel, lowertick, nominal) {
 }
 
 popcov_specs <- list(
-  list(dtype = "severe",   lowertick = 60, file_stem = "outputs/plots/popcov_severe"),
-  list(dtype = "moderate", lowertick = 60, file_stem = "outputs/plots/popcov_moderate"),
-  list(dtype = "normal",   lowertick = 80, file_stem = "outputs/plots/popcov_normal")
+  list(dtype = "severe",   lowertick = 50, file_stem = "outputs/plots/popcov_severe"),
+  list(dtype = "moderate", lowertick = 50, file_stem = "outputs/plots/popcov_moderate"),
+  list(dtype = "normal",   lowertick = 50, file_stem = "outputs/plots/popcov_normal")
 )
 
 for (cl in sort(unique(resag$conf_level))) {
