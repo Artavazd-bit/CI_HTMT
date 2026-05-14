@@ -7,16 +7,23 @@ collapse_warns <- function(w) {
   paste(unique(w), collapse = " || ")
 }
 
-# Combine the three per-scope error/warning strings from a cfa_one() result
-# into a single message with "uncon:" / "con:" / "lrt:" prefixes, skipping
-# empty scopes. Returns NA_character_ if all three are empty.
-combine_cfa_msgs <- function(uncon, con, lrt) {
-  parts <- c(
-    if (!is.na(uncon) && nzchar(uncon)) paste0("uncon: ", uncon),
-    if (!is.na(con)   && nzchar(con))   paste0("con: ",   con),
-    if (!is.na(lrt)   && nzchar(lrt))   paste0("lrt: ",   lrt)
+# Build three rows (uncon/con/lrt) of the long-format errors frame from a
+# cfa_one() result. `attempted` is FALSE for the lrt row when either fit
+# failed and lavTestLRT was therefore skipped.
+build_cfa_err_rows <- function(estimator, res) {
+  data.frame(
+    estimator       = estimator,
+    scope           = c("uncon", "con", "lrt"),
+    attempted       = c(TRUE, TRUE,
+                        !is.null(res$fit_uncon) && !is.null(res$fit_con)),
+    error_message   = c(res$err_uncon, res$err_con, res$err_lrt),
+    warning_message = c(collapse_warns(res$warns_uncon),
+                        collapse_warns(res$warns_con),
+                        collapse_warns(res$warns_lrt)),
+    n_boot_valid    = NA_integer_,
+    n_jack_valid    = NA_integer_,
+    stringsAsFactors = FALSE
   )
-  if (length(parts) == 0L) NA_character_ else paste(parts, collapse = " || ")
 }
 
 # Time a single expression; returns list(value, secs).
@@ -162,27 +169,19 @@ ci_battery <- function(data, nboot = 1000, nindicator = 3,
     stringsAsFactors = FALSE
   )
 
-  errors <- data.frame(
-    estimator       = c("cfa", "cfa_robust", "htmt"),
-    error_message   = c(combine_cfa_msgs(cfa_res$err_uncon,
-                                         cfa_res$err_con,
-                                         cfa_res$err_lrt),
-                        combine_cfa_msgs(cfa_robust_res$err_uncon,
-                                         cfa_robust_res$err_con,
-                                         cfa_robust_res$err_lrt),
-                        htmt_err),
-    warning_message = c(combine_cfa_msgs(collapse_warns(cfa_res$warns_uncon),
-                                         collapse_warns(cfa_res$warns_con),
-                                         collapse_warns(cfa_res$warns_lrt)),
-                        combine_cfa_msgs(collapse_warns(cfa_robust_res$warns_uncon),
-                                         collapse_warns(cfa_robust_res$warns_con),
-                                         collapse_warns(cfa_robust_res$warns_lrt)),
-                        collapse_warns(warns_htmt)),
-    n_boot_valid    = c(NA_integer_, NA_integer_,
-                        if (!is.null(htmt_res)) htmt_res$n_boot_valid else NA_integer_),
-    n_jack_valid    = c(NA_integer_, NA_integer_,
-                        if (!is.null(htmt_res)) htmt_res$n_jack_valid else NA_integer_),
-    stringsAsFactors = FALSE
+  errors <- rbind(
+    build_cfa_err_rows("cfa",        cfa_res),
+    build_cfa_err_rows("cfa_robust", cfa_robust_res),
+    data.frame(
+      estimator       = "htmt",
+      scope           = NA_character_,
+      attempted       = TRUE,
+      error_message   = htmt_err,
+      warning_message = collapse_warns(warns_htmt),
+      n_boot_valid    = if (!is.null(htmt_res)) htmt_res$n_boot_valid else NA_integer_,
+      n_jack_valid    = if (!is.null(htmt_res)) htmt_res$n_jack_valid else NA_integer_,
+      stringsAsFactors = FALSE
+    )
   )
 
   list(ci = ci, lrt = lrt, errors = errors)

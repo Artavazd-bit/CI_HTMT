@@ -102,9 +102,14 @@ for (k in seq_len(REPS_PER_TASK)) {
         stringsAsFactors = FALSE
       ),
       errors = data.frame(
-        estimator       = c("cfa", "cfa_robust", "htmt"),
+        estimator       = c(rep("cfa", 3), rep("cfa_robust", 3), "htmt"),
+        scope           = c("uncon", "con", "lrt",
+                            "uncon", "con", "lrt", NA_character_),
+        attempted       = FALSE,
         error_message   = msg,
         warning_message = NA_character_,
+        n_boot_valid    = NA_integer_,
+        n_jack_valid    = NA_integer_,
         stringsAsFactors = FALSE
       )
     )

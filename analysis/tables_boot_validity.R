@@ -76,4 +76,4 @@ write_latex_table(
 )
 
 message(sprintf("Wrote %s (%d rows).",
-                file.path(OUT_DIR, "boot_validity_v2.tex"), nrow(bv_tab)))
+                file.path(OUT_DIR, "boot_validity2.tex"), nrow(bv_tab)))
