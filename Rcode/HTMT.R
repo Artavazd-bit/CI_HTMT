@@ -21,6 +21,9 @@ HTMT_jacobian <- function(data, use_cor = FALSE, nindicator){
   i <- 1:nindicator
   m1 <- mean(S[i,i][lower.tri(S[i,i])])
   m2 <- mean(S[-i,-i][lower.tri(S[-i,-i])])
+  if(m1*m2 < 0 ){
+    warning("Negative mean inside sqrt()")
+  }
   htmtval <- mean(S[i,-i]) / sqrt(m1 * m2)
   deltaintra1 <- -htmtval * (nindicator * (nindicator-1) * m1)^(-1)
   deltaintra2 <- -htmtval * (nindicator * (nindicator-1) * m2)^(-1)
