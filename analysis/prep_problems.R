@@ -1,13 +1,19 @@
 library(dplyr)
 
-# Builds `problems`, consumed by analysis/plots_problems.R.
+# Builds `problems`, consumed by analysis/plots_problems.R and
+# analysis/tables_problems.R.
 #
-# Per (condition x method x conf_level), counts the fraction of replications
-# that have *any* problem: a missing point estimate or a missing/NaN lower or
-# upper bound. For CFA / CFA-MLR a lavaan warning or error is also treated as
-# a failed estimate, mirroring the clean-rep filter in prep_ci.R. HTMT keeps
+# Per (condition x method), counts the fraction of replications that have
+# *any* problem: a missing point estimate or a missing/NaN lower or upper
+# bound. For CFA / CFA-MLR a lavaan warning or error is also treated as a
+# failed estimate, mirroring the clean-rep filter in prep_ci.R. HTMT keeps
 # its raw NA status (the benign jackknife "Negative mean inside sqrt()"
 # warning is not promoted to a failure).
+#
+# Failure counts are invariant across the three conf_levels (CFA: same fit
+# yields three identical rows; HTMT BCa: bias correction / acceleration are
+# alpha-independent, so a NaN-z0 or NaN-a kills every quantile). We collapse
+# by filtering to conf_level == 0.95.
 
 if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_14"
 CI_DIR  <- file.path(RESULTS_DIR, "ci")
@@ -51,8 +57,10 @@ dfall$is_problem <- is.na(dfall$estimate) |
                     is.na(dfall$lowerbound) |
                     is.na(dfall$upperbound)
 
-problems <- dfall %>%
-  group_by(correlation, n, dtype, estimator, method, conf_level) %>%
+dfall_95 <- dfall[dfall$conf_level == 0.95, ]
+
+problems <- dfall_95 %>%
+  group_by(correlation, n, dtype, estimator, method) %>%
   summarize(n_reps      = n(),
             n_problem   = sum(is_problem),
             pct_problem = 100 * n_problem / n_reps,
@@ -66,5 +74,5 @@ problems$method2 <- factor(method_labels[problems$method], levels = method_label
 problems$correlation_lbl <- paste("Phi ==", format(problems$correlation, nsmall = 2))
 
 message(sprintf(
-  "problems: %d (condition x method x conf_level) groups, %d with any failure.",
+  "problems: %d (condition x method) groups, %d with any failure.",
   nrow(problems), sum(problems$n_problem > 0)))
