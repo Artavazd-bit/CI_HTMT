@@ -65,9 +65,9 @@ resag <- dfall2 %>%
 
 method_labels <- c(perc = "Percentile", delta = "Asymptotic",
                    bca = "BCa", bc = "BC",
-                   wald_cfa = "CFA", wald_cfa_robust = "CFA-MLR")
+                   wald_cfa = "CFA-ML", wald_cfa_robust = "CFA-MLR")
 resag$method2 <- factor(method_labels[resag$method], levels = method_labels)
 
 resag$correlation <- format(resag$correlation, nsmall = 2)
-resag$correlation <- paste("Phi ==", resag$correlation)
+resag$correlation <- paste("phi ==", resag$correlation)
 
