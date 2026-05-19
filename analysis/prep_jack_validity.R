@@ -1,10 +1,5 @@
 library(dplyr)
 
-# Builds `boot_validity`: per (correlation, n, dtype), the share of reps in
-# which the bootstrap distribution had a given number of non-computable HTMT
-# resamples (n_boot_missing = 1000 - n_boot_valid). Bins are coarse-on-the-
-# tail because the missing-count distribution is highly skewed (median 0,
-# but max up to ~983 in n=25, severe conditions).
 
 if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_13"
 ERR_DIR <- file.path(RESULTS_DIR, "errors")
@@ -19,25 +14,10 @@ dfall3  <- do.call(rbind, lapply(ci_files,  readRDS))
 
 dfall3 <- dfall3[dfall3$estimator == "htmt" & dfall3$method == "bca" & dfall3$conf_level == 0.9,]
 
-
-# Single source of truth for the bin definitions (label + predicate).
-#BIN_SPECS <- list(
-#  list(label = "0",        test = function(x) x == 0),
-#  list(label = "1-10",     test = function(x) x >=   1 & x <=   10),
-#  list(label = "11-25",    test = function(x) x >=  11 & x <=   25),
-#  list(label = "26-50",    test = function(x) x >=  26 & x <=   50),
-#  list(label = "51-100",   test = function(x) x >=  51 & x <=  100),
-#  list(label = "101-250",  test = function(x) x >= 101 & x <=  250),
-#  list(label = "251-1000", test = function(x) x >= 251 & x <= 1000)
-#)
 BIN_SPECS <- list(
   list(label = "0",        test = function(x) x == 0),
-  list(label = "1-25",     test = function(x) x >=   1 & x <=   25),
-  list(label = "26-50",    test = function(x) x >=  26 & x <=   50),
-  list(label = "51-100",    test = function(x) x >=  51 & x <=  100),
-  list(label = "101-500",   test = function(x) x >=  101 & x <=  500),
-  list(label = "501-750",  test = function(x) x >= 501 & x <=  750),
-  list(label = "751-1000", test = function(x) x >= 751 & x <= 1000)
+  list(label = "0-1",     test = function(x) x >   0 & x <=   1),
+  list(label = "1-100",    test = function(x) x > 1  & x <=   100)
 )
 BIN_LABELS <- vapply(BIN_SPECS, `[[`, character(1), "label")
 
@@ -46,7 +26,8 @@ if (length(err_files) == 0L) stop("No .rds files found in ERR_DIR: ", ERR_DIR)
 
 errall <- do.call(rbind, lapply(err_files, readRDS))
 htmt <- errall[errall$estimator == "htmt", ]
-htmt$n_boot_missing <- NBOOT - htmt$n_boot_valid
+htmt$n_jack_missing <- htmt$n - htmt$n_jack_valid 
+htmt$n_jack_missing_perc <- htmt$n_jack_missing / htmt$n 
 
 htmt_val <- merge(htmt, dfall3,
                   by = c("task_id", "rep_in_batch"))
@@ -56,17 +37,17 @@ htmt_val <- htmt_val[!is.na(htmt_val$estimate) & !is.na(htmt_val$lowerbound), ]
 # All HTMT reps in this dataset have a recorded n_boot_valid (no NAs);
 # fail loudly if a future result set violates that, since it would change
 # how the shares should be interpreted.
-if (anyNA(htmt_val$n_boot_missing)) {
+if (anyNA(htmt_val$n_jack_missing)) {
   stop(sprintf("Unexpected NA n_boot_valid in %d HTMT rows; revisit the ",
                "binning scheme to add an explicit 'HTMT failed' bucket.",
                sum(is.na(htmt_val$n_boot_missing))))
 }
 
-boot_validity <- htmt_val %>%
+jack_validity <- htmt_val %>%
   group_by(correlation.x, n.x, dtype.x) %>%
   group_modify(~ {
     shares <- vapply(BIN_SPECS,
-                     function(b) 100 * mean(b$test(.x$n_boot_missing)),
+                     function(b) 100 * mean(b$test(.x$n_jack_missing_perc)),
                      numeric(1))
     out <- data.frame(n_reps = nrow(.x), check.names = FALSE)
     for (i in seq_along(BIN_LABELS)) out[[BIN_LABELS[i]]] <- shares[i]
@@ -77,11 +58,11 @@ boot_validity <- htmt_val %>%
 
 # Sanity: rows must sum to 100% (within float tolerance), confirming the
 # bins are exhaustive and non-overlapping.
-row_sums <- rowSums(as.matrix(boot_validity[, BIN_LABELS]))
+row_sums <- rowSums(as.matrix(jack_validity[, BIN_LABELS]))
 if (any(abs(row_sums - 100) > 1e-9)) {
-  stop("boot_validity row sums deviate from 100%: ",
+  stop("jack_validity row sums deviate from 100%: ",
        paste(round(row_sums - 100, 6), collapse = ", "))
 }
 
-message(sprintf("boot_validity: %d (correlation x n x dtype) rows, %d reps total.",
-                nrow(boot_validity), sum(boot_validity$n_reps)))
+message(sprintf("jack_validity: %d (correlation x n x dtype) rows, %d reps total.",
+                nrow(jack_validity), sum(jack_validity$n_reps)))

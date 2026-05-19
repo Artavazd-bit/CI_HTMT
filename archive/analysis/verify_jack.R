@@ -1,5 +1,6 @@
 library(dplyr)
-ERR_DIR <- "results/results_2026_05_06_time_ci/errors"
+if (!exists("RESULTS_DIR", inherits = TRUE)) RESULTS_DIR <- "results/results_2026_05_13"
+ERR_DIR <- file.path(RESULTS_DIR, "errors")
 ef <- list.files(ERR_DIR, pattern = "\\.rds$", full.names = TRUE)
 errall <- do.call(rbind, lapply(ef, readRDS))
 htmt <- errall[errall[["estimator"]] == "htmt", ]
@@ -10,7 +11,7 @@ cat("Reps with NA n_jack_valid:", sum(is.na(htmt[["n_jack_valid"]])), "\n\n")
 
 cat("Distribution of n_jack_missing across conditions (n x dtype):\n")
 overview <- htmt %>%
-  group_by(n, dtype) %>%
+  group_by(n, dtype, correlation) %>%
   summarise(n_reps   = n(),
             zero_miss = mean(n_jack_missing == 0) * 100,
             any_miss  = sum(n_jack_missing > 0),

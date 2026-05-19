@@ -1,13 +1,13 @@
 library(dplyr)
 
-if (!exists("boot_validity", inherits = FALSE)) source("analysis/prep_boot_validity.R")
+if (!exists("jack_validity", inherits = FALSE)) source("analysis/prep_boot_validity.R")
 
 OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
 # Keep only conditions where the bootstrap had any missings; rows where 100%
 # of reps had zero missings are uninformative and inflate the table.
-bv <- boot_validity %>% filter(.data[["0"]] < 100)
+bv <- jack_validity %>% filter(.data[["0"]] < 100)
 
 # --- LaTeX writer (booktabs, no escape on headers) ---------------------------
 escape_latex <- function(x) {
@@ -28,7 +28,7 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
     }, character(1))
     paste0(paste(cells, collapse = " & "), " \\\\")
   }, character(1))
-
+  
   header <- paste(colnames(df), collapse = " & ")
   lines <- c(
     "\\begin{table}[htbp]",
@@ -52,28 +52,20 @@ bv_tab <- bv %>%
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
-            `1--25`    = .data[["1-25"]],
-            `26--50`   = .data[["26-50"]],
-            `51--100`   = .data[["51-100"]],
-            `101--500`  = .data[["101-500"]],
-            `501--750` = .data[["501-750"]],
-            `751--1000` = .data[["751-1000"]])
+            `0--1`    = .data[["0-1"]],
+            `1--100`   = .data[["1-100"]])
 
-boot_validity_tab <- boot_validity %>% 
+jack_validity_tab <- jack_validity %>% 
   transmute(`$\\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
-            `1--25`    = .data[["1-25"]],
-            `26--50`   = .data[["26-50"]],
-            `51--100`   = .data[["51-100"]],
-            `101--500`  = .data[["101-500"]],
-            `501--750` = .data[["501-750"]],
-            `751--1000` = .data[["751-1000"]])
+            `0--1`    = .data[["0-1"]],
+            `1--100`   = .data[["1-100"]])
 
 write_latex_table(
   bv_tab,
-  file    = file.path(OUT_DIR, "boot_validity.tex"),
+  file    = file.path(OUT_DIR, "jack_validity.tex"),
   caption = paste("Relative frequency [in \\%] of replications by number of",
                   "bootstrap samples for which the HTMT is not computable,",
                   "across conditions. Per condition, 1{,}000 replications",
@@ -81,14 +73,13 @@ write_latex_table(
                   "per-replication miss-count. Conditions where every",
                   "replication has 0 missings are omitted; rows sum to 100\\%."),
   label   = "tab:boot-validity",
-  align   = c("r", "r", "l", "r", "r", "r", "r", "r", "r", "r"),
+  align   = c("r", "r", "l", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",
-              "%.1f", "%.1f", "%.1f", "%.1f",
               "%.1f", "%.1f", "%.1f")
 )
 
 write_latex_table(
-  boot_validity_tab,
+  jack_validity_tab,
   file    = file.path(OUT_DIR, "boot_validity_all.tex"),
   caption = paste("Relative frequency [in \\%] of replications by number of",
                   "bootstrap samples for which the HTMT is not computable,",
@@ -97,11 +88,8 @@ write_latex_table(
                   "per-replication miss-count. Conditions where every",
                   "replication has 0 missings are omitted; rows sum to 100\\%."),
   label   = "tab:boot-validity",
-  align   = c("r", "r", "l", "r", "r", "r", "r", "r", "r", "r"),
+  align   = c("r", "r", "l", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",
-              "%.1f", "%.1f", "%.1f", "%.1f",
               "%.1f", "%.1f", "%.1f")
 )
 
-message(sprintf("Wrote %s (%d rows).",
-                file.path(OUT_DIR, "boot_validity2.tex"), nrow(bv_tab)))
