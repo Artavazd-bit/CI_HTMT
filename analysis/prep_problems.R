@@ -66,7 +66,7 @@ problems <- dfall_95 %>%
             pct_problem = 100 * n_problem / n_reps,
             .groups = "drop")
 
-method_labels <- c(wald_cfa = "CFA", wald_cfa_robust = "CFA-MLR",
+method_labels <- c(wald_cfa = "CFA-ML", wald_cfa_robust = "CFA-MLR",
                    delta = "Asymptotic", perc = "Percentile",
                    bc = "BC", bca = "BCa")
 problems$method2 <- factor(method_labels[problems$method], levels = method_labels)

@@ -1,10 +1,3 @@
-# Master script: regenerate every plot and table under outputs/ from the
-# RDS result files in RESULTS_DIR. Run from the repo root so the relative
-# source() / file.path() calls in the analysis scripts resolve correctly.
-#
-# Each prep / plot / table script remains runnable standalone -- the
-# exists()-guarded source() calls in those scripts no-op when this master
-# has already populated the global environment.
 
 if (!file.exists("CI_HTMT.Rproj")) {
   stop("updateplotstables.R must be run from the repo root ",
