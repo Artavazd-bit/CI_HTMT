@@ -80,7 +80,7 @@ write_latex_table(
 
 write_latex_table(
   jack_validity_tab,
-  file    = file.path(OUT_DIR, "boot_validity_all.tex"),
+  file    = file.path(OUT_DIR, "jack_validity_all.tex"),
   caption = paste("Relative frequency [in \\%] of replications by number of",
                   "bootstrap samples for which the HTMT is not computable,",
                   "across conditions. Per condition, 1{,}000 replications",
