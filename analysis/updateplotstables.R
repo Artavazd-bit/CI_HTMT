@@ -24,7 +24,8 @@ scripts <- c(
   "analysis/prep_boot_validity.R",
   "analysis/tables_boot_validity.R",
   "analysis/prep_jack_validity.R",
-  "analysis/tables_jack_validity.R"
+  "analysis/tables_jack_validity.R",
+  "analysis/rep_HTMT.R"
 )
 
 t0 <- Sys.time()

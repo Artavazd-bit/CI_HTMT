@@ -36,7 +36,7 @@ for (cl in sort(unique(resag$conf_level))) {
                labeller = labeller(correlation = label_parsed,
                                    dtype2 = dtype_labeller)) +
     geom_hline(data = d, aes(yintercept = hline)) +
-    scale_y_continuous(breaks = y_breaks, name = "Rejection rate") +
+    scale_y_continuous(breaks = y_breaks, name = "Rejection rate (%)") +
     theme(legend.position = "bottom") +
     labs(x = "Sample size") +
     scale_linetype_discrete(name = "Type of CI:") +

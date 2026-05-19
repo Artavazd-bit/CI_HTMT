@@ -48,7 +48,7 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
 }
 
 bv_tab <- bv %>%
-  transmute(`$\\phi$`        = correlation.x,
+  transmute(`$\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
@@ -60,7 +60,7 @@ bv_tab <- bv %>%
             `751--1000` = .data[["751-1000"]])
 
 boot_validity_tab <- boot_validity %>% 
-  transmute(`$\\phi$`        = correlation.x,
+  transmute(`$\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
