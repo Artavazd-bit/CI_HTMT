@@ -48,7 +48,7 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
 }
 
 bv_tab <- bv %>%
-  transmute(`$\phi$`        = correlation.x,
+  transmute(`$\\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
@@ -56,7 +56,7 @@ bv_tab <- bv %>%
             `1--100`   = .data[["1-100"]])
 
 jack_validity_tab <- jack_validity %>% 
-  transmute(`$\phi$`        = correlation.x,
+  transmute(`$\\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
@@ -67,11 +67,8 @@ write_latex_table(
   bv_tab,
   file    = file.path(OUT_DIR, "jack_validity.tex"),
   caption = paste("Relative frequency [in \\%] of replications by number of",
-                  "bootstrap samples for which the HTMT is not computable,",
-                  "across conditions. Per condition, 1{,}000 replications",
-                  "each draw 1{,}000 bootstrap samples; columns bin the",
-                  "per-replication miss-count. Conditions where every",
-                  "replication has 0 missings are omitted; rows sum to 100\\%."),
+                  "jackknife samples for which the HTMT is not computable,",
+                  "across conditions."),
   label   = "tab:boot-validity",
   align   = c("r", "r", "l", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",
@@ -82,11 +79,8 @@ write_latex_table(
   jack_validity_tab,
   file    = file.path(OUT_DIR, "jack_validity_all.tex"),
   caption = paste("Relative frequency [in \\%] of replications by number of",
-                  "bootstrap samples for which the HTMT is not computable,",
-                  "across conditions. Per condition, 1{,}000 replications",
-                  "each draw 1{,}000 bootstrap samples; columns bin the",
-                  "per-replication miss-count. Conditions where every",
-                  "replication has 0 missings are omitted; rows sum to 100\\%."),
+                  "jackknife samples for which the HTMT is not computable,",
+                  "across conditions."),
   label   = "tab:boot-validity",
   align   = c("r", "r", "l", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",

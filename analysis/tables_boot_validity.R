@@ -48,7 +48,7 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
 }
 
 bv_tab <- bv %>%
-  transmute(`$\phi$`        = correlation.x,
+  transmute(`$\\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
@@ -60,7 +60,7 @@ bv_tab <- bv %>%
             `751--1000` = .data[["751-1000"]])
 
 boot_validity_tab <- boot_validity %>% 
-  transmute(`$\phi$`        = correlation.x,
+  transmute(`$\\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
@@ -74,12 +74,9 @@ boot_validity_tab <- boot_validity %>%
 write_latex_table(
   bv_tab,
   file    = file.path(OUT_DIR, "boot_validity.tex"),
-  caption = paste("Relative frequency [in \\%] of replications by number of",
-                  "bootstrap samples for which the HTMT is not computable,",
-                  "across conditions. Per condition, 1{,}000 replications",
-                  "each draw 1{,}000 bootstrap samples; columns bin the",
-                  "per-replication miss-count. Conditions where every",
-                  "replication has 0 missings are omitted; rows sum to 100\\%."),
+  caption = paste("Relative frequency [in \\%] of simulation runs by number of",
+                  "bootstrap samples for which the HTMT is not admissible,",
+                  "across conditions."),
   label   = "tab:boot-validity",
   align   = c("r", "r", "l", "r", "r", "r", "r", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",
@@ -90,12 +87,9 @@ write_latex_table(
 write_latex_table(
   boot_validity_tab,
   file    = file.path(OUT_DIR, "boot_validity_all.tex"),
-  caption = paste("Relative frequency [in \\%] of replications by number of",
-                  "bootstrap samples for which the HTMT is not computable,",
-                  "across conditions. Per condition, 1{,}000 replications",
-                  "each draw 1{,}000 bootstrap samples; columns bin the",
-                  "per-replication miss-count. Conditions where every",
-                  "replication has 0 missings are omitted; rows sum to 100\\%."),
+  caption = paste("Relative frequency [in \\%] of simulation runs by number of",
+                  "bootstrap samples for which the HTMT is not admissible,",
+                  "across conditions."),
   label   = "tab:boot-validity",
   align   = c("r", "r", "l", "r", "r", "r", "r", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",
