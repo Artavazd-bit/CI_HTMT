@@ -1,9 +1,6 @@
 library(ggplot2)
 
-# Expects `resag` to be loaded already with columns:
-#   correlation (formatted as "Phi == 0.70"), n, dtype ("normal"/"moderate"/"severe"),
-#   method2 (factor), covagoneag (coverage of phi=1 in %, 0-100),
-#   conf_level (numeric, e.g. 0.90, 0.95, 0.99)
+# expects output from prep_ci
 
 dir.create("outputs/plots", recursive = TRUE, showWarnings = FALSE)
 

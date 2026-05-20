@@ -23,9 +23,7 @@ ci_estimator_grp <- c(wald_cfa = "cfa", wald_cfa_robust = "cfa_robust",
                       delta = "htmt", perc = "htmt", bc = "htmt", bca = "htmt")
 dfall$estimator_grp <- ci_estimator_grp[dfall$method]
 
-# Left-join errors onto CI on (task_id, rep_in_batch, estimator_grp). One-to-many
-# fan-out: one HTMT error row -> 12 CI rows (4 methods x 3 conf_levels) for that
-# rep; one CFA-flavour error row -> 3 CI rows (1 method x 3 conf_levels).
+# Left-join errors onto CI on (task_id, rep_in_batch, estimator_grp). One-to-many.
 err_join <- errall[errall$scope == "uncon" | is.na(errall$scope), c("task_id", "rep_in_batch", "estimator",
                        "error_message", "warning_message")]
 err_join <- dplyr::rename(err_join, estimator_grp = estimator)
@@ -39,10 +37,7 @@ dfall$lowerwithin <- dfall$correlation > dfall$lowerbound
 dfall$coverageone <- (1 > dfall$lowerbound) & (1 < dfall$upperbound)
 
 # Clean-rep filter: require finite estimate + bounds; for CFA/CFA-MLR drop on
-# any error OR warning; for HTMT drop only on hard errors (the "Negative mean
-# inside sqrt()" jackknife warning is benign as long as the bounds computed).
-# Per-row (not per-rep) drop so e.g. a NaN-BCa bound doesn't take delta/perc/bc
-# down with it when those produced finite bounds for the same rep.
+# any error OR warning; for HTMT drop only on hard errors 
 err_clean <- ifelse(dfall$estimator_grp == "htmt",
                     is.na(dfall$error_message),
                     is.na(dfall$error_message) & is.na(dfall$warning_message))
