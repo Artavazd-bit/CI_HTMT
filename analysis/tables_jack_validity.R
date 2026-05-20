@@ -52,16 +52,16 @@ bv_tab <- bv %>%
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
-            `0--1`    = .data[["0-1"]],
-            `1--100`   = .data[["1-100"]])
+            `0--1`    = .data[["(0,1]"]],
+            `1--100`   = .data[["(1,100]"]])
 
 jack_validity_tab <- jack_validity %>% 
   transmute(`$\\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
-            `0--1`    = .data[["0-1"]],
-            `1--100`   = .data[["1-100"]])
+            `0--1`    = .data[["(0,1]"]],
+            `1--100`   = .data[["(1,100]"]])
 
 write_latex_table(
   bv_tab,
