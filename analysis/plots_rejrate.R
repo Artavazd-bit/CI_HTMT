@@ -26,7 +26,7 @@ for (cl in sort(unique(resag$conf_level))) {
 
   d <- resag_cl
   d$rejrate <- 100 - d$covagoneag
-  d$hline   <- ifelse(d$correlation == "phi == 1.00",
+  d$hline   <- ifelse(d$correlation == "Phi == 1.00",
                       nominal_rej_at_one, PRACTICAL_HLINE)
   
   p <- ggplot(d, aes(x = as.factor(n), y = rejrate, group = method2)) +
