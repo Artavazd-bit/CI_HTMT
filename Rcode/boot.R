@@ -1,3 +1,5 @@
+# provides the function used for the boot methods
+
 myboot <- function(data, statisticfun, ..., nboot){
   boot <- sapply(1:nboot, function(x) statisticfun(data = dplyr::slice_sample(data, n = nrow(data), replace = TRUE), ...))
   valid_boot <- boot[!is.na(boot)]

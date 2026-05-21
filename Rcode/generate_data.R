@@ -1,3 +1,6 @@
+# data generating function; normal and non-normal. 
+# if non-normal then the skewness and kurtosis values are used. 
+
 generate_data <- function(n, 
                           population_model,
                           datatype = c("normal", "nonnormal"), 

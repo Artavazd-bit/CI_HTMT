@@ -5,8 +5,7 @@ if (!exists("boot_validity", inherits = FALSE)) source("analysis/prep_boot_valid
 OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-# Keep only conditions where the bootstrap had any missings; rows where 100%
-# of reps had zero missings are uninformative and inflate the table.
+# Keep only conditions where the bootstrap had any missings; 
 bv <- boot_validity %>% filter(.data[["0"]] < 100)
 
 # --- LaTeX writer (booktabs, no escape on headers) ---------------------------

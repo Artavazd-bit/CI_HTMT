@@ -1,3 +1,5 @@
+# provides the functions used for the cfa methods
+
 model_unconstrained <- '
               #  latent variables
                 xi_1 =~ NA*x11 + x12 + x13
@@ -18,9 +20,6 @@ model_constrained <- '
                 xi_2 ~~ 1 * xi_2
                 '
 
-# Each of {uncon fit, con fit, LRT} runs in its own error scope so that a
-# downstream failure (e.g. lavTestLRT NA scaling factor on a Heywood case)
-# cannot discard the valid point estimate from an earlier step.
 cfa_one <- function(data, estimator = "ML"){
 
   run_step <- function(expr) {

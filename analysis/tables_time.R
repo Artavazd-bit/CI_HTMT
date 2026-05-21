@@ -26,8 +26,7 @@ time_relpct_wide <- time_resag %>%
 OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-# Drop methods that aren't in this result drop (e.g., wald_cfa_robust is absent
-# in pre-robust result files); keep the canonical order otherwise.
+# Drop methods that aren't in this result drop
 method_order <- c("wald_cfa_robust", "delta", "perc", "bc", "bca")
 header_map   <- c(wald_cfa_robust = "CFA-MLR", delta = "Asymptotic",
                   perc = "Percentile", bc = "BC", bca = "BCa")

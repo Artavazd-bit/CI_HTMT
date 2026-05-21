@@ -1,3 +1,6 @@
+
+# creates the condition.rds file
+# includes all simulation conditions and is used for the SLURM tasks
 library(lavaan)
 library(dplyr)
 library(foreach)
@@ -35,7 +38,6 @@ simModels <- foreach(i = 1:nrow(param), .combine = "rbind") %do%
       model = simCommonFactor
     )
     save
-    #rm(save, simCommonFactor, i)
   }
 simModels
 rm(coefs, corr, param, simCommonFactor, save, i)

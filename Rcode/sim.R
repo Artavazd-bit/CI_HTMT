@@ -5,26 +5,31 @@ suppressPackageStartupMessages({
   library(covsim)
 })
 
+# loads the helper functions
 source("Rcode/cfa.R")
 source("Rcode/HTMT.R")
 source("Rcode/boot.R")
 source("Rcode/analyse.R")
 source("Rcode/generate_data.R")
 
+# setting for SLURM and L'Ecuyer
 MASTER_SEED   <- 20260501L
 REPS_PER_TASK <- 100L
 NBOOT         <- 1000L
 CONF_LEVELS   <- c(0.90, 0.95, 0.99)
 
+# task_id is the task from SLURM if run on local task_id is set to 1
 task_id <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID", "1"))
 if (is.na(task_id) || task_id < 1L) stop("Invalid SLURM_ARRAY_TASK_ID: ", task_id)
 
+# read the conditions
 conditions <- readRDS("conditions.rds")
 cond <- conditions[conditions$task_id == task_id, , drop = FALSE]
 if (nrow(cond) != 1L) {
   stop(sprintf("Expected 1 row for task_id=%d, got %d.", task_id, nrow(cond)))
 }
 
+# set the simulation conditions
 dt_arg <- if (cond$dtype == "normal") "normal" else "nonnormal"
 sk_arg <- cond$skewness[[1]]
 kt_arg <- cond$kurtosis[[1]]
@@ -35,6 +40,8 @@ message(sprintf(
   cond$dtype, REPS_PER_TASK
 ))
 
+# reproducibility
+# we set a master set and then set the streams of random states
 RNGkind("L'Ecuyer-CMRG")
 set.seed(MASTER_SEED)
 stream <- .Random.seed
@@ -46,6 +53,7 @@ for (k in seq_len(REPS_PER_TASK)) {
   streams[[k]] <- stream
 }
 
+# initialising output files
 ci_list   <- vector("list", REPS_PER_TASK)
 lrt_list  <- vector("list", REPS_PER_TASK)
 err_list  <- vector("list", REPS_PER_TASK)
@@ -54,6 +62,7 @@ data_list <- vector("list", REPS_PER_TASK)
 cond_cols <- cond[, c("task_id", "condition_id", "rep_batch",
                       "correlation", "n", "datatype", "dtype")]
 
+# main simulation script
 for (k in seq_len(REPS_PER_TASK)) {
   seed_k <- streams[[k]]
   assign(".Random.seed", seed_k, envir = globalenv())
@@ -141,6 +150,11 @@ for (k in seq_len(REPS_PER_TASK)) {
   err_list[[k]] <- cbind(expand(prefix, nrow(res$errors)), res$errors, row.names = NULL)
 }
 
+# storing of the results
+# ci tables include the main findings
+# error tables report the missings, warning and error messages
+# datasets lists include all the datasets generated for each simulation run
+# lrt tables report the findings of constrained phi approach
 results_ci  <- do.call(rbind, ci_list)
 results_lrt <- do.call(rbind, lrt_list)
 results_err <- do.call(rbind, err_list)

@@ -1,4 +1,7 @@
 
+# master file for updating plots and tables, prep files prepare the data, 
+# plot files produce png stored in output subfolder
+# table files produce LaTeX tables stored in output subfolder
 if (!file.exists("CI_HTMT.Rproj")) {
   stop("updateplotstables.R must be run from the repo root ",
        "(working directory should contain CI_HTMT.Rproj). Current wd: ",

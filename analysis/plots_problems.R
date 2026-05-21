@@ -16,7 +16,6 @@ problems_plot$dtype <- factor(problems_plot$dtype,
                               levels = c("normal", "moderate", "severe"))
 
 # Heatmap: same facet layout, fill = failure rate. Cells with 0% stay white
-# so the eye locks onto the few problematic conditions.
 make_problems_heatmap <- function(d) {
   ggplot(d, aes(x = as.factor(n), y = method2, fill = pct_problem)) +
     geom_tile(colour = "grey85") +
