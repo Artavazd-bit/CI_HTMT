@@ -21,8 +21,8 @@ make_problems_heatmap <- function(d) {
     geom_tile(colour = "grey85") +
     geom_text(aes(label = ifelse(pct_problem > 0,
                                  sprintf("%.1f", pct_problem), "")),
-              size = 2.5) +
-    facet_grid(rows = vars(dtype), cols = vars(correlation_lbl),
+              size = 2.4) +
+    facet_grid(rows = vars(correlation_lbl), cols = vars(dtype),
                labeller = labeller(correlation_lbl = label_parsed,
                                    dtype = dtype_labeller)) +
     scale_fill_gradient(name = "Inadmissible rate (%)",
@@ -30,11 +30,13 @@ make_problems_heatmap <- function(d) {
                         limits = c(0, NA)) +
     scale_y_discrete(limits = rev) +
     labs(x = "Sample size", y = NULL) +
-    theme_minimal() +
+    theme_minimal(base_size = 9) +
     theme(legend.position = "bottom",
-          panel.grid = element_blank())
+          panel.grid = element_blank(),
+          axis.text.y = element_text(size = 7),                       # NEW
+          axis.text.x = element_text(angle = 45, hjust = 1))          # NEW
 }
 
 p_heat <- make_problems_heatmap(problems_plot)
 ggsave(file.path(OUT_DIR, "problems_heatmap.png"),
-       plot = p_heat, width = 15.375, height = 9.15625)
+       plot = p_heat, width = 8.4, height = 5.2, dpi = 300)

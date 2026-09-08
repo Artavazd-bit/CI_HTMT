@@ -7,11 +7,11 @@ dir.create("outputs/plots", recursive = TRUE, showWarnings = FALSE)
 OUTDIR <- "outputs/plots/rejrate"
 
 PRACTICAL_HLINE <- 80 # practical-significance reference for phi < 1
-y_breaks <- seq(0, 100, by = 10)
+y_breaks <- seq(0, 100, by = 20)
 
 dtype_labeller <- c(normal   = "normal",
-                    moderate = "moderately non-normal",
-                    severe   = "severely non-normal")
+                    moderate = "moderately\nnon-normal",
+                    severe   = "severely\nnon-normal")
 
 resag$dtype2 <- factor(resag$dtype,
                               levels = c("normal", "moderate", "severe"))
@@ -34,7 +34,8 @@ for (cl in sort(unique(resag$conf_level))) {
                                    dtype2 = dtype_labeller)) +
     geom_hline(data = d, aes(yintercept = hline)) +
     scale_y_continuous(breaks = y_breaks, name = "Rejection rate (%)") +
-    theme(legend.position = "bottom") +
+    theme(legend.position = "bottom", 
+          axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x = "Sample size") +
     scale_linetype_discrete(name = "Type of CI:") +
     scale_shape_discrete(name = "Type of CI:") + 
@@ -42,6 +43,6 @@ for (cl in sort(unique(resag$conf_level))) {
            shape = guide_legend(nrow=1))
   
   ggsave(sprintf("%s_%s.png", OUTDIR, cl_tag),
-         plot = p, width = 15.375, height = 9.15625)
+         plot = p, width = 8.4, height = 5.2, dpi = 300)
 }
 

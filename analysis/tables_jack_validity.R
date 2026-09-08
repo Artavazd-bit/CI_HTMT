@@ -51,24 +51,22 @@ bv_tab <- bv %>%
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
-            `0--1`    = .data[["(0,1]"]],
-            `1--100`   = .data[["(1,100]"]])
+            `0--1`    = .data[["0-1"]],
+            `1--100`   = .data[["1-100"]])
 
 jack_validity_tab <- jack_validity %>% 
   transmute(`$\\phi$`        = correlation.x,
             `$n$`            = n.x,
             `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
-            `0--1`    = .data[["(0,1]"]],
-            `1--100`   = .data[["(1,100]"]])
+            `0--1`    = .data[["0-1"]],
+            `1--100`   = .data[["1-100"]])
 
 write_latex_table(
   bv_tab,
   file    = file.path(OUT_DIR, "jack_validity.tex"),
-  caption = paste("Relative frequency [in \\%] of replications by number of",
-                  "jackknife samples for which the HTMT is not computable,",
-                  "across conditions."),
-  label   = "tab:boot-validity",
+  caption = paste("Relative frequency [in \%] of replications by percentage of jackknife samples for which the HTMT could not be computed, across conditions. Only simulation conditions are shown in which the HTMT could not be calculated for at least one jackknife sample."),
+  label   = "tab:jack-validity",
   align   = c("r", "r", "l", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",
               "%.1f", "%.1f", "%.1f")
@@ -77,10 +75,8 @@ write_latex_table(
 write_latex_table(
   jack_validity_tab,
   file    = file.path(OUT_DIR, "jack_validity_all.tex"),
-  caption = paste("Relative frequency [in \\%] of replications by number of",
-                  "jackknife samples for which the HTMT is not computable,",
-                  "across conditions."),
-  label   = "tab:boot-validity",
+  caption = paste("Relative frequency [in \%] of replications by percentage of jackknife samples for which the HTMT could not be computed, across conditions. Only simulation conditions are shown in which the HTMT could not be calculated for at least one jackknife sample."),
+  label   = "tab:jack-validity-all",
   align   = c("r", "r", "l", "r", "r", "r"),
   fmt     = c("%.2f", "%d", "s",
               "%.1f", "%.1f", "%.1f")
