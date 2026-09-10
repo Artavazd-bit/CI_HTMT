@@ -9,6 +9,9 @@ OUTDIR <- "outputs/plots/rejrate"
 PRACTICAL_HLINE <- 80 # practical-significance reference for phi < 1
 y_breaks <- seq(0, 100, by = 20)
 
+size_scale_line <- 0.5
+size_scale_point <- 1
+
 dtype_labeller <- c(normal   = "normal",
                     moderate = "moderately\nnon-normal",
                     severe   = "severely\nnon-normal")
@@ -27,8 +30,8 @@ for (cl in sort(unique(resag$conf_level))) {
                       nominal_rej_at_one, PRACTICAL_HLINE)
   
   p <- ggplot(d, aes(x = as.factor(n), y = rejrate, group = method2)) +
-    geom_line(aes(linetype = method2)) +
-    geom_point(aes(shape = method2)) +
+    geom_line(aes(linetype = method2), linewidth = size_scale_line) +
+    geom_point(aes(shape = method2), size = size_scale_point) +
     facet_grid(rows = vars(dtype2), cols = vars(correlation),
                labeller = labeller(correlation = label_parsed,
                                    dtype2 = dtype_labeller)) +

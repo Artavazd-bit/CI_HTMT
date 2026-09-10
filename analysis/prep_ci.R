@@ -64,5 +64,5 @@ method_labels <- c(perc = "Percentile", delta = "Asymptotic",
 resag$method2 <- factor(method_labels[resag$method], levels = method_labels)
 
 resag$correlation <- format(resag$correlation, nsmall = 2)
-resag$correlation <- paste("Phi ==", resag$correlation)
+resag$correlation <- paste("$\\phi =", resag$correlation, "$")
 

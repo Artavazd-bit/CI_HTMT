@@ -32,15 +32,20 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
   lines <- c(
     "\\begin{table}[htbp]",
     "\\centering",
+    "\\footnotesize",
     sprintf("\\caption{%s}", caption),
     sprintf("\\label{%s}", label),
     sprintf("\\begin{tabular}{%s}", paste(align, collapse = "")),
     "\\toprule",
+    # multicolumn header
+    "& & & \\multicolumn{7}{c}{Number of inadmissible bootstrap estimates} \\\\",  
     paste0(header, " \\\\"),
     "\\midrule",
     body,
     "\\bottomrule",
     "\\end{tabular}",
+    "\\vspace{4pt}" , 
+    "{\\footnotesize Note: Only conditions in which at least one bootstrap estimate was inadmissible are reported.}" ,
     "\\end{table}"
   )
   writeLines(lines, file)
@@ -48,8 +53,8 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
 
 bv_tab <- bv %>%
   transmute(`$\\phi$`        = correlation.x,
+            `Data Distribution`     = dtype.x,
             `$n$`            = n.x,
-            `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
             `1--25`    = .data[["1-25"]],
             `26--50`   = .data[["26-50"]],
@@ -60,8 +65,8 @@ bv_tab <- bv %>%
 
 boot_validity_tab <- boot_validity %>% 
   transmute(`$\\phi$`        = correlation.x,
+            `Data Distribution`     = dtype.x,
             `$n$`            = n.x,
-            `data distribution`     = dtype.x,
             `0`        = .data[["0"]],
             `1--25`    = .data[["1-25"]],
             `26--50`   = .data[["26-50"]],
@@ -77,8 +82,8 @@ write_latex_table(
                   "bootstrap samples for which the HTMT is not admissible,",
                   "across conditions."),
   label   = "tab:boot-validity",
-  align   = c("r", "r", "l", "r", "r", "r", "r", "r", "r", "r"),
-  fmt     = c("%.2f", "%d", "s",
+  align   = c("r", "l", "r", "r", "r", "r", "r", "r", "r", "r"),
+  fmt     = c("%.2f", "s", "%d",
               "%.1f", "%.1f", "%.1f", "%.1f",
               "%.1f", "%.1f", "%.1f")
 )
@@ -89,12 +94,12 @@ write_latex_table(
   caption = paste("Relative frequency [in \\%] of simulation runs by number of",
                   "bootstrap samples for which the HTMT is not admissible,",
                   "across conditions."),
-  label   = "tab:boot-validity",
-  align   = c("r", "r", "l", "r", "r", "r", "r", "r", "r", "r"),
-  fmt     = c("%.2f", "%d", "s",
+  label   = "tab:boot-validity_all",
+  align   = c("r", "l", "r", "r", "r", "r", "r", "r", "r", "r"),
+  fmt     = c("%.2f", "s", "%d",
               "%.1f", "%.1f", "%.1f", "%.1f",
               "%.1f", "%.1f", "%.1f")
 )
 
 message(sprintf("Wrote %s (%d rows).",
-                file.path(OUT_DIR, "boot_validity2.tex"), nrow(bv_tab)))
+                file.path(OUT_DIR, "boot_validity.tex"), nrow(bv_tab)))
