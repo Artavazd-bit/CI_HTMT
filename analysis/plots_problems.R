@@ -26,7 +26,8 @@ make_problems_heatmap <- function(d) {
                labeller = labeller(dtype = dtype_labeller)) +
     scale_fill_gradient(name = "Inadmissible rate (\\%)",
                         low = "white", high = "firebrick",
-                        limits = c(0, NA)) +
+                        limits = c(0, NA),
+                        guide = guide_colourbar(raster = FALSE, nbin = 50)) +
     scale_y_discrete(limits = rev) +
     labs(x = "Sample size", y = NULL) +
     theme_minimal(base_size = 9) +
