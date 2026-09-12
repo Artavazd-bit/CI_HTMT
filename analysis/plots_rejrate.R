@@ -9,8 +9,8 @@ OUTDIR <- "outputs/plots/rejrate"
 PRACTICAL_HLINE <- 80 # practical-significance reference for phi < 1
 y_breaks <- seq(0, 100, by = 20)
 
-size_scale_line <- 0.5
-size_scale_point <- 1
+size_scale_line <- 0.4
+size_scale_point <- 0.8
 
 dtype_labeller <- c(normal   = "normal",
                     moderate = "moderately\nnon-normal",
@@ -26,17 +26,16 @@ for (cl in sort(unique(resag$conf_level))) {
 
   d <- resag_cl
   d$rejrate <- 100 - d$covagoneag
-  d$hline   <- ifelse(d$correlation == "Phi == 1.00",
+  d$hline   <- ifelse(d$correlation == "$\\phi = 1.00 $",
                       nominal_rej_at_one, PRACTICAL_HLINE)
   
   p <- ggplot(d, aes(x = as.factor(n), y = rejrate, group = method2)) +
     geom_line(aes(linetype = method2), linewidth = size_scale_line) +
     geom_point(aes(shape = method2), size = size_scale_point) +
     facet_grid(rows = vars(dtype2), cols = vars(correlation),
-               labeller = labeller(correlation = label_parsed,
-                                   dtype2 = dtype_labeller)) +
+               labeller = labeller(dtype2 = dtype_labeller)) +
     geom_hline(data = d, aes(yintercept = hline)) +
-    scale_y_continuous(breaks = y_breaks, name = "Rejection rate (%)") +
+    scale_y_continuous(breaks = y_breaks, name = "Rejection rate (\\%)") +
     theme(legend.position = "bottom", 
           axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x = "Sample size") +
@@ -45,7 +44,11 @@ for (cl in sort(unique(resag$conf_level))) {
     guides(linetype = guide_legend(nrow = 1),
            shape = guide_legend(nrow=1))
   
-  ggsave(sprintf("%s_%s.png", OUTDIR, cl_tag),
-         plot = p, width = 8.4, height = 5.2, dpi = 300)
+  tikz(file = sprintf("%s_%s.tex", OUTDIR, cl_tag), width=8.4, height=5.2)
+  print(p)
+  endoffile <- dev.off()
+  #ggsave(sprintf("%s_%s.png", OUTDIR, cl_tag),
+  #       plot = p, width = 8.4, height = 5.2, dpi = 300)
+  
 }
 
