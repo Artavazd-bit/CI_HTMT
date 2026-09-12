@@ -60,8 +60,8 @@ dfall$is_problem <- is.na(dfall$estimate) |
 dfall_95 <- dfall[dfall$conf_level == 0.95, ]
 
 problems <- dfall_95 %>%
-  group_by(correlation, n, dtype, estimator, method) %>%
-  summarize(n_reps      = n(),
+  dplyr::group_by(correlation, n, dtype, estimator, method) %>%
+  dplyr::summarize(n_reps      = n(),
             n_problem   = sum(is_problem),
             pct_problem = 100 * n_problem / n_reps,
             .groups = "drop")
@@ -71,7 +71,7 @@ method_labels <- c(wald_cfa = "CFA-ML", wald_cfa_robust = "CFA-MLR",
                    bc = "BC", bca = "BCa")
 problems$method2 <- factor(method_labels[problems$method], levels = method_labels)
 
-problems$correlation_lbl <- paste("Phi ==", format(problems$correlation, nsmall = 2))
+problems$correlation_lbl <- paste("$\\phi =", format(problems$correlation, nsmall = 2), "$")
 
 message(sprintf(
   "problems: %d (condition x method) groups, %d with any failure.",

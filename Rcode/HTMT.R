@@ -97,4 +97,3 @@ HTMTDM <- function(data, nindicator, alpha = 0.05) {
   list(htmt = ds$htmt, se = ds$se,
        lowerbound = ci$lowerbound, upperbound = ci$upperbound)
 }
-

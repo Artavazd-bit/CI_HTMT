@@ -23,9 +23,8 @@ make_problems_heatmap <- function(d) {
                                  sprintf("%.1f", pct_problem), "")),
               size = 2.4) +
     facet_grid(rows = vars(correlation_lbl), cols = vars(dtype),
-               labeller = labeller(correlation_lbl = label_parsed,
-                                   dtype = dtype_labeller)) +
-    scale_fill_gradient(name = "Inadmissible rate (%)",
+               labeller = labeller(dtype = dtype_labeller)) +
+    scale_fill_gradient(name = "Inadmissible rate (\\%)",
                         low = "white", high = "firebrick",
                         limits = c(0, NA)) +
     scale_y_discrete(limits = rev) +
@@ -37,6 +36,10 @@ make_problems_heatmap <- function(d) {
           axis.text.x = element_text(angle = 45, hjust = 1))          # NEW
 }
 
+tikz(file = file.path(OUT_DIR, "problems_heatmap.tex"), width=8.4, height=5.2)
+
 p_heat <- make_problems_heatmap(problems_plot)
-ggsave(file.path(OUT_DIR, "problems_heatmap.png"),
-       plot = p_heat, width = 8.4, height = 5.2, dpi = 300)
+#ggsave(file.path(OUT_DIR, "problems_heatmap.png"),
+#       plot = p_heat, width = 8.4, height = 5.2, dpi = 300)
+print(p_heat)
+endoffile <- dev.off() 
