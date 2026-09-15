@@ -38,9 +38,16 @@ dfall$coverageone <- (1 > dfall$lowerbound) & (1 < dfall$upperbound)
 
 # Clean-rep filter: require finite estimate + bounds; for CFA/CFA-MLR drop on
 # any error OR warning; for HTMT drop only on hard errors 
+
+#err_clean <- ifelse(dfall$estimator_grp == "htmt",
+#                    is.na(dfall$error_message),
+#                    is.na(dfall$error_message) & is.na(dfall$warning_message))
+
 err_clean <- ifelse(dfall$estimator_grp == "htmt",
                     is.na(dfall$error_message),
-                    is.na(dfall$error_message) & is.na(dfall$warning_message))
+                    is.na(dfall$error_message) &
+                      !grepl("solution has NOT been found", dfall$warning_message))
+
 finite_ok <- is.finite(dfall$estimate) &
              is.finite(dfall$lowerbound) &
              is.finite(dfall$upperbound)

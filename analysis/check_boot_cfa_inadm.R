@@ -41,6 +41,8 @@ err_clean <- ifelse(dfall$estimator_grp == "htmt", ifelse(dfall$method == "delta
                     is.na(dfall$error_message) & dfall$n_boot_valid > 900), TRUE
                     #is.na(dfall$error_message) & is.na(dfall$warning_message)
                     )
+
+
 finite_ok <- is.finite(dfall$estimate) &
   is.finite(dfall$lowerbound) &
   is.finite(dfall$upperbound)
