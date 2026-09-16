@@ -1,9 +1,9 @@
 source("analysis/prep_problems.R")
 
-df_cfa <- dfall_95[dfall_95$estimator_grp == c("cfa", "cfa_robust"), ]
+df_cfa <- dfall2[dfall2$estimator_grp == c("cfa", "cfa_robust"), ]
 
 
-df_cfa_prob <- df_cfa[df_cfa$is_problem == TRUE, ]
+df_cfa_prob <- df_cfa[, ]
 
 
 unique(df_cfa_prob$warning_message)

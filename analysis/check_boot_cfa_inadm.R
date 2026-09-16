@@ -32,7 +32,7 @@ err_join <- dplyr::rename(err_join, estimator_grp = estimator)
 dfall <- merge(dfall, err_join,
                by = c("task_id", "rep_in_batch", "estimator_grp"),
                all.x = TRUE, sort = FALSE)
-
+ 
 dfall$upperwithin <- dfall$correlation < dfall$upperbound
 dfall$lowerwithin <- dfall$correlation > dfall$lowerbound
 dfall$coverageone <- (1 > dfall$lowerbound) & (1 < dfall$upperbound)
