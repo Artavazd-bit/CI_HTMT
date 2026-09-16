@@ -44,7 +44,8 @@ if (anyNA(htmt_val$n_jack_missing)) {
 }
 
 jack_validity <- htmt_val %>%
-  group_by(correlation.x, n.x, dtype.x) %>%
+  mutate(dtype.x = factor(dtype.x, levels = c("normal", "moderate", "severe"))) %>%
+  group_by(correlation.x, dtype.x, n.x) %>%
   group_modify(~ {
     shares <- vapply(BIN_SPECS,
                      function(b) 100 * mean(b$test(.x$n_jack_missing_perc)),

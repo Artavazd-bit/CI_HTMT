@@ -48,16 +48,16 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
 
 bv_tab <- bv %>%
   transmute(`$\\phi$`        = correlation.x,
-            `$n$`            = n.x,
             `Data Distribution`     = dtype.x,
+            `$n$`            = n.x,
             `0`        = .data[["0"]],
             `0--1`    = .data[["0-1"]],
             `1--100`   = .data[["1-100"]])
 
 jack_validity_tab <- jack_validity %>% 
   transmute(`$\\phi$`        = correlation.x,
-            `$n$`            = n.x,
             `Data Distribution`     = dtype.x,
+            `$n$`            = n.x,
             `0`        = .data[["0"]],
             `0--1`    = .data[["0-1"]],
             `1--100`   = .data[["1-100"]])

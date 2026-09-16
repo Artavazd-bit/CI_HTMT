@@ -50,7 +50,10 @@ dfall <- merge(dfall, err_join,
 # CFA / CFA-MLR: promote any lavaan warning or error to an estimate failure.
 # HTMT: leave estimate as-is (NA only when the computation truly returned NA).
 is_cfa <- dfall$estimator_grp %in% c("cfa", "cfa_robust")
-has_problem <- !is.na(dfall$error_message) | !is.na(dfall$warning_message)
+#has_problem <- !is.na(dfall$error_message) | !is.na(dfall$warning_message)
+has_problem <- !is.na(dfall$error_message) |
+  grepl("solution has NOT been found", dfall$warning_message)
+
 dfall$estimate[is_cfa & has_problem] <- NA
 
 dfall$is_problem <- is.na(dfall$estimate) |
