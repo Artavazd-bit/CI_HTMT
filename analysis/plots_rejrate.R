@@ -12,9 +12,9 @@ y_breaks <- seq(0, 100, by = 20)
 size_scale_line <- 0.4
 size_scale_point <- 0.8
 
-dtype_labeller <- c(normal   = "normal",
-                    moderate = "moderately\nnon-normal",
-                    severe   = "severely\nnon-normal")
+dtype_labeller <- c(normal   = "Normal",
+                    moderate = "Moderately\nNon-Normal",
+                    severe   = "Severely\nNon-Normal")
 
 resag$dtype2 <- factor(resag$dtype,
                               levels = c("normal", "moderate", "severe"))

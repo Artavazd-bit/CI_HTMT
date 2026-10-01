@@ -1,13 +1,15 @@
 library(ggplot2)
+library(tikz)
+
 
 if (!exists("problems", inherits = FALSE)) source("analysis/prep_problems.R")
 
 OUT_DIR <- "outputs/plots"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-dtype_labeller <- c(normal   = "normal",
-                    moderate = "moderately non-normal",
-                    severe   = "severely non-normal")
+dtype_labeller <- c(normal   = "Normal",
+                    moderate = "Moderately Non-Normal",
+                    severe   = "Severely Non-Normal")
 
 
 

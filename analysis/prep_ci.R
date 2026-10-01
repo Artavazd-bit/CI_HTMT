@@ -65,8 +65,8 @@ resag <- dfall2 %>%
             time_mean = mean(time),
             .groups = "drop")
 
-method_labels <- c(perc = "Percentile", delta = "Asymptotic",
-                   bca = "BCa", bc = "BC",
+method_labels <- c(perc = "Percentile", 
+                  bc = "BC", bca = "BCa", delta = "Asymptotic", 
                    wald_cfa = "CFA-ML", wald_cfa_robust = "CFA-MLR")
 resag$method2 <- factor(method_labels[resag$method], levels = method_labels)
 
