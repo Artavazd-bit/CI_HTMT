@@ -1,5 +1,4 @@
 library(ggplot2)
-library(tikz)
 
 
 if (!exists("problems", inherits = FALSE)) source("analysis/prep_problems.R")
