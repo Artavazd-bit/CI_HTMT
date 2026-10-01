@@ -35,10 +35,10 @@ for (cl in sort(unique(resag$conf_level))) {
     facet_grid(rows = vars(dtype2), cols = vars(correlation),
                labeller = labeller(dtype2 = dtype_labeller)) +
     geom_hline(data = d, aes(yintercept = hline)) +
-    scale_y_continuous(breaks = y_breaks, name = "Rejection rate (\\%)") +
+    scale_y_continuous(breaks = y_breaks, name = "Rejection Rate (\\%)") +
     theme(legend.position = "bottom", 
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Sample size") +
+    labs(x = "Sample Size") +
     scale_linetype_discrete(name = "Type of CI:") +
     scale_shape_discrete(name = "Type of CI:") + 
     guides(linetype = guide_legend(nrow = 1),

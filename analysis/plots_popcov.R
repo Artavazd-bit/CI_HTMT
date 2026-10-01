@@ -42,7 +42,7 @@ make_popcov_plot <- function(resag, dtype_sel, lowertick, nominal) {
     theme(legend.position = "bottom",
           strip.text.x = element_blank(),
           axis.text.x  = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Sample size") +
+    labs(x = "Sample Size") +
     scale_linetype_discrete(name = "Type of CI:") +
     scale_shape_discrete(name = "Type of CI:") + 
     guides(linetype = guide_legend(nrow = 1),
