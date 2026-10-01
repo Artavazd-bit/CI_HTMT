@@ -23,7 +23,7 @@ make_popcov_plot <- function(resag, dtype_sel, lowertick, nominal) {
     geom_point(aes(shape = method2), size = size_scale_point) +
     facet_grid(cols = vars(correlation)) +
     geom_hline(yintercept = nominal) +
-    scale_y_continuous(name = "Pop. correlation value\nbelow upper limit (\\%)",
+    scale_y_continuous(name = "Pop. Correlation Value\nBelow Upper Limit (\\%)",
                        breaks = y_breaks, limits = c(lowertick, 100), labels = as.character) +
     theme_minimal() +
     theme(legend.position = "none",
@@ -36,7 +36,7 @@ make_popcov_plot <- function(resag, dtype_sel, lowertick, nominal) {
     geom_point(aes(shape = method2), size = size_scale_point) +
     facet_grid(cols = vars(correlation)) +
     geom_hline(yintercept = nominal) +
-    scale_y_reverse(name = "Pop. correlation value\nabove lower limit (\\%)",
+    scale_y_reverse(name = "Pop. Correlation Aalue\nAbove Lower Limit (\\%)",
                     breaks = y_breaks, limits = c(100, lowertick), labels = as.character) +
     theme_minimal() +
     theme(legend.position = "bottom",

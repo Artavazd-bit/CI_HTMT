@@ -12,7 +12,7 @@ sp <- dfall[dfall$estimator == "htmt" & is.na(dfall$estimate) & dfall$n > 25,]
 # example case for which no HTMT could be calculated: 
 sp[1,]
 # task id: 55, rep in batch: 71
-df <- readRDS("C:/Forschung/CI_HTMT/results/results_2026_05_14/datasets/df_task_00055.rds")
+df <- readRDS("results/results_2026_05_14/datasets/df_task_00055.rds")
 
 data <- df[[71]]$data
 
