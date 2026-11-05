@@ -1,4 +1,6 @@
 library(ggplot2)
+library(patchwork)
+library(tikzDevice)
 
 # expects output from prep_ci
 
@@ -36,6 +38,7 @@ for (cl in sort(unique(resag$conf_level))) {
                labeller = labeller(dtype2 = dtype_labeller)) +
     geom_hline(data = d, aes(yintercept = hline)) +
     scale_y_continuous(breaks = y_breaks, name = "Rejection rate (\\%)") +
+    theme_minimal() + 
     theme(legend.position = "bottom", 
           axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x = "Sample size") +
