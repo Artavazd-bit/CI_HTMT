@@ -1,13 +1,14 @@
 library(ggplot2)
 
+
 if (!exists("problems", inherits = FALSE)) source("analysis/prep_problems.R")
 
 OUT_DIR <- "outputs/plots"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
-dtype_labeller <- c(normal   = "normal",
-                    moderate = "moderately non-normal",
-                    severe   = "severely non-normal")
+dtype_labeller <- c(normal   = "Normal",
+                    moderate = "Moderately Non-Normal",
+                    severe   = "Severely Non-Normal")
 
 
 
@@ -24,12 +25,12 @@ make_problems_heatmap <- function(d) {
               size = 2.4) +
     facet_grid(rows = vars(correlation_lbl), cols = vars(dtype),
                labeller = labeller(dtype = dtype_labeller)) +
-    scale_fill_gradient(name = "Inadmissible rate (\\%)",
+    scale_fill_gradient(name = "Inadmissible Rate (\\%)",
                         low = "white", high = "firebrick",
                         limits = c(0, NA),
                         guide = guide_colourbar(raster = FALSE, nbin = 50)) +
     scale_y_discrete(limits = rev) +
-    labs(x = "Sample size", y = NULL) +
+    labs(x = "Sample Size", y = NULL) +
     theme_minimal(base_size = 9) +
     theme(legend.position = "bottom",
           panel.grid = element_blank(),

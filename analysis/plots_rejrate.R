@@ -14,9 +14,9 @@ y_breaks <- seq(0, 100, by = 20)
 size_scale_line <- 0.4
 size_scale_point <- 0.8
 
-dtype_labeller <- c(normal   = "normal",
-                    moderate = "moderately\nnon-normal",
-                    severe   = "severely\nnon-normal")
+dtype_labeller <- c(normal   = "Normal",
+                    moderate = "Moderately\nNon-Normal",
+                    severe   = "Severely\nNon-Normal")
 
 resag$dtype2 <- factor(resag$dtype,
                               levels = c("normal", "moderate", "severe"))
@@ -37,11 +37,11 @@ for (cl in sort(unique(resag$conf_level))) {
     facet_grid(rows = vars(dtype2), cols = vars(correlation),
                labeller = labeller(dtype2 = dtype_labeller)) +
     geom_hline(data = d, aes(yintercept = hline)) +
-    scale_y_continuous(breaks = y_breaks, name = "Rejection rate (\\%)") +
     theme_minimal() + 
+    scale_y_continuous(breaks = y_breaks, name = "Rejection Rate (\\%)") +
     theme(legend.position = "bottom", 
           axis.text.x = element_text(angle = 45, hjust = 1)) +
-    labs(x = "Sample size") +
+    labs(x = "Sample Size") +
     scale_linetype_discrete(name = "Type of CI:") +
     scale_shape_discrete(name = "Type of CI:") + 
     guides(linetype = guide_legend(nrow = 1),
