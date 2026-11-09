@@ -30,3 +30,22 @@ agg$share_skew_gt_0.5 <- aggregate(skew ~ dtype + phi + n, data = res, FUN = fun
 agg$share_bias_pos <- aggregate(bias ~ dtype + phi + n, data = res, FUN = function(x) round(mean(x > 0), 2))$bias
 agg$runs <- aggregate(skew ~ dtype + phi + n, data = res, FUN = length)$skew
 print(agg[order(agg$dtype, agg$phi, agg$n), ], row.names = FALSE)
+
+
+
+library(dplyr)
+library(moments)
+
+mom_data <- dfall2[, c("estimate", "correlation", "n", "dtype", )] 
+
+
+skewnesstable <- dfall2 %>% 
+  group_by(correlation, n, dtype, method, conf_level) %>% 
+  summarize(mean = mean(estimate),
+            sd = sd(estimate),
+            skewness = skewness(estimate),
+            kurtosis = kurtosis(estimate)
+  )
+
+
+table <- unique(skewnesstable[skewnesstable$conf_level == 0.9 & skewnesstable$method == "bc",])
