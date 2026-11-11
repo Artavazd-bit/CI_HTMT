@@ -7,6 +7,8 @@
 #SBATCH --time=06:00:00
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=4G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=jason.berger@uni-wuerzburg.de
 #SBATCH --qos=cpu
 
 set -euo pipefail
@@ -17,4 +19,4 @@ mkdir -p results/ci results/lrt results/errors results/logs/out results/logs/err
 
 export RENV_PATHS_CACHE="${SCRATCH:-$HOME}/renv-cache"
 
-Rscript Rcode/sim.R
+Rscript Rcode/bootextra_revision_3/sim_bootextra.R
