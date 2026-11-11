@@ -1,0 +1,91 @@
+
+# creates the condition.rds file
+# includes all simulation conditions and is used for the SLURM tasks
+library(lavaan)
+library(dplyr)
+library(foreach)
+
+nindicator <- 3
+coefs <- 1
+corr <- c(0.7, 0.8, 0.9, 0.95, 1)
+param <- expand.grid(loading1 = coefs, loading2 = coefs, correlation = corr)
+simModels <- foreach(i = 1:nrow(param), .combine = "rbind") %do%
+  {
+    simCommonFactor <- 
+      paste(
+        paste("xi_1 =~ ",param$loading1[i], "*x11 + ",param$loading1[i],"*x12 + ",param$loading1[i], "*x13"),"\n"
+        , paste("xi_2 =~ ",param$loading2[i], "*x21 + ",param$loading2[i],"*x22 + ",param$loading2[i], "*x23"), "\n"
+        , paste("xi_1 ~~ 1*xi_1 + ", param$correlation[i], "*xi_2"),"\n"
+        , "xi_2 ~~ 1*xi_2 \n"
+        , paste("x11 ~~", 0.6, "*x11 + 0*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23"),"\n"
+        , paste("x12 ~~", 0.5, "*x12 + 0*x13 + 0*x21 + 0*x22 + 0*x23"),"\n"
+        , paste("x13 ~~", 0.2, "*x13 + 0*x21 + 0*x22 + 0*x23"),"\n"
+        , paste("x21 ~~", 0.6, "*x21 + 0*x22 + 0*x23"),"\n"
+        , paste("x22 ~~", 0.5, "*x22 + 0*x23"),"\n"
+        , paste("x23 ~~", 0.2, "*x23"), "\n"
+        , paste("x11 ~ 0*1"), "\n"
+        , paste("x12 ~ 0*1"), "\n"
+        , paste("x13 ~ 0*1"), "\n"
+        , paste("x21 ~ 0*1"), "\n"
+        , paste("x22 ~ 0*1"), "\n"
+        , paste("x23 ~ 0*1"), "\n"
+      )
+    save <- data.frame(
+      loading_1 = param$loading1[i],
+      loading_2 =  param$loading2[i],
+      correlation = param$correlation[i],
+      model_id = i,
+      model = simCommonFactor
+    )
+    save
+  }
+simModels
+rm(coefs, corr, param, simCommonFactor, save, i)
+short_models <- simModels[c("correlation", "model", "model_id")]
+
+dt_lookup <- data.frame(datatype = c(1, 2, 3), 
+                     dtype = c("normal", "moderate", "severe"),
+                     skewness = I(list(NULL, rep(2, nindicator*2), rep(3, nindicator*2))),
+                     kurtosis = I(list(NULL, rep(7, nindicator*2), rep(21, nindicator*2)))
+)
+
+conditions <- expand.grid(rep_batch = 1:10,
+                          correlation = c(0.7, 0.8, 0.9, 0.95, 1),
+                          n = c(25, 50, 100, 200, 400, 800, 1600, 3200, 6400),
+                          datatype = c(1 , 2, 3)
+                          )
+
+conditions <- conditions %>%
+              left_join(dt_lookup, by = "datatype") %>%
+              left_join(short_models, by = "correlation")
+
+unique_cond <- unique(conditions[, c("correlation", "n", "datatype")])
+unique_cond <- unique_cond[order(unique_cond$correlation, unique_cond$n, unique_cond$datatype), ]
+unique_cond$condition_id <- seq_len(nrow(unique_cond))
+
+conditions <- conditions %>% left_join(unique_cond, by = c("correlation", "n", "datatype"))
+conditions <- conditions[order(conditions$condition_id, conditions$rep_batch), ]
+conditions$task_id <- seq_len(nrow(conditions))
+
+conditions <- conditions[, c("task_id", "condition_id", "rep_batch",
+                             "correlation", "n", "datatype", "dtype",
+                             "skewness", "kurtosis", "model", "model_id")]
+rownames(conditions) <- NULL
+
+#saveRDS(conditions, file = "conditions_bootextra.rds")
+#message(sprintf("Wrote conditions.rds: %d rows (%d unique conditions x %d batches).",
+#                nrow(conditions), length(unique(conditions$condition_id)),
+#                length(unique(conditions$rep_batch))))
+
+sel <- conditions[(conditions$correlation == 1.0 & conditions$n == 25  & conditions$dtype == "severe") |
+              (conditions$correlation == 1.0 & conditions$n == 400 & conditions$dtype == "normal"), ]
+
+saveRDS(sel, file = "Rcode/bootextra_revision_3/conditions_bootextra.rds")
+
+
+
+
+
+
+
+
