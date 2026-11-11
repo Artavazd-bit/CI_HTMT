@@ -19,12 +19,12 @@ NBOOT         <- 1000L
 CONF_LEVELS   <- c(0.90, 0.95, 0.99)
 
 # task_id is the task from SLURM if run on local task_id is set to 1
-task_id <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID", "1101"))
+task_id <- as.integer(Sys.getenv("SLURM_ARRAY_TASK_ID", "1"))
 if (is.na(task_id) || task_id < 1L) stop("Invalid SLURM_ARRAY_TASK_ID: ", task_id)
 
 # read the conditions
 conditions <- readRDS("Rcode/bootextra_revision_3/conditions_bootextra.rds")
-cond <- conditions[conditions$task_id == task_id, , drop = FALSE]
+cond <- conditions[task_id, , drop = FALSE]
 if (nrow(cond) != 1L) {
   stop(sprintf("Expected 1 row for task_id=%d, got %d.", task_id, nrow(cond)))
 }

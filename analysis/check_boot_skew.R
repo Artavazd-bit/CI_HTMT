@@ -35,6 +35,7 @@ print(agg[order(agg$dtype, agg$phi, agg$n), ], row.names = FALSE)
 
 library(dplyr)
 library(moments)
+source("analysis/prep_ci.R")
 
 mom_data <- dfall2[, c("estimate", "correlation", "n", "dtype", )] 
 
