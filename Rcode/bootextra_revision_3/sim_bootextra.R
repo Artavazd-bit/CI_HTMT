@@ -24,7 +24,7 @@ if (is.na(task_id) || task_id < 1L) stop("Invalid SLURM_ARRAY_TASK_ID: ", task_i
 
 # read the conditions
 conditions <- readRDS("Rcode/bootextra_revision_3/conditions_bootextra.rds")
-cond <- conditions[task_id, , drop = FALSE]
+cond <- conditions[conditions$task_id == task_id, , drop = FALSE]
 if (nrow(cond) != 1L) {
   stop(sprintf("Expected 1 row for task_id=%d, got %d.", task_id, nrow(cond)))
 }

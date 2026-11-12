@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=ci-htmt-sim
-#SBATCH --array=1-20
+#SBATCH --array=1101-1110,1201-1210
 #SBATCH -p small_cpu
 #SBATCH --output=results/logs/out/sim-%A_%a.out
 #SBATCH --error=results/logs/err/sim-%A_%a.err
