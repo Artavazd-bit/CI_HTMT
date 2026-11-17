@@ -23,9 +23,6 @@ boot_long <- do.call(rbind, lapply(files, function(f) {
   }))
 }))
 
-skew_stats <- skew %>%
-              group_by(condition_id) %>%
-              summarize(mean = mean(skewness), median = median(skewness))
 
 skew <- boot_long %>%
   filter(condition_id %in% c(111, 121)) %>%
@@ -33,18 +30,21 @@ skew <- boot_long %>%
   summarize(skewness = moments::skewness(htmt_boot), .groups = "drop") %>%
   mutate(condition_id = factor(condition_id))
 
+skew_stats <- skew %>%
+  group_by(condition_id) %>%
+  summarize(mean = mean(skewness), median = median(skewness))
 
 skewdensplots <- ggplot(skew, aes(skewness)) +
   geom_density() +
   facet_wrap(~ condition_id, ncol = 1, scales = "free",
-             labeller = as_labeller(c(`111` = "$n = 25, \\phi = 1$, Severly Non-Normal",
+             labeller = as_labeller(c(`111` = "$n = 25, \\phi = 1$, Severely Non-Normal",
                                       `121` = "$n = 400, \\phi = 1$, Normal"))) +
   geom_vline(data = skew_stats, aes(xintercept = mean), linetype = "dashed") +
   geom_vline(data = skew_stats, aes(xintercept = median), linetype = "dotted") +
   labs(x = "Skewness of the bootstrap HTMT distribution", y = "Density") + 
   theme_minimal()
 
-tikz(file = sprintf("outputs/plots/skewdensplots.tex", OUTDIR), width=8.4, height=5.2)
+tikz(file = sprintf("outputs/plots/skewdensplots.tex"), width=8.4, height=5.2)
 print(skewdensplots)
 endoffile <- dev.off()
 

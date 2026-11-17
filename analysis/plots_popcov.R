@@ -44,7 +44,7 @@ make_popcov_plot <- function(resag, dtype_sel, lowertick, nominal) {
     geom_point(aes(shape = method2, colour = method2), size = size_scale_point) +
     facet_grid(cols = vars(correlation)) +
     geom_hline(yintercept = nominal) +
-    scale_y_reverse(name = "Pop. Correlation Aalue\nAbove Lower Limit (\\%)",
+    scale_y_reverse(name = "Pop. Correlation Value\nAbove Lower Limit (\\%)",
                     breaks = y_breaks, limits = c(100, lowertick), labels = as.character) +
     theme_minimal() +
     theme(legend.position = "bottom",
