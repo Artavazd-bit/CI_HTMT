@@ -16,8 +16,9 @@ dfall3 <- dfall3[dfall3$estimator == "htmt" & dfall3$method == "bca" & dfall3$co
 
 BIN_SPECS <- list(
   list(label = "0",        test = function(x) x == 0),
-  list(label = "0-1",     test = function(x) x >   0 & x <=   1),
-  list(label = "1-100",    test = function(x) x > 1  & x <=   100)
+  list(label = "0-5",      test = function(x) x >  0 & x <=   5),
+  list(label = "5-10",     test = function(x) x >  5 & x <=  10),
+  list(label = "10-100",   test = function(x) x > 10 & x <= 100)
 )
 BIN_LABELS <- vapply(BIN_SPECS, `[[`, character(1), "label")
 
@@ -27,7 +28,7 @@ if (length(err_files) == 0L) stop("No .rds files found in ERR_DIR: ", ERR_DIR)
 errall <- do.call(rbind, lapply(err_files, readRDS))
 htmt <- errall[errall$estimator == "htmt", ]
 htmt$n_jack_missing <- htmt$n - htmt$n_jack_valid 
-htmt$n_jack_missing_perc <- htmt$n_jack_missing / htmt$n 
+htmt$n_jack_missing_perc <- 100 * htmt$n_jack_missing / htmt$n
 
 htmt_val <- merge(htmt, dfall3,
                   by = c("task_id", "rep_in_batch"))

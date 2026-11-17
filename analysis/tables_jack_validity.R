@@ -1,6 +1,6 @@
 library(dplyr)
 
-if (!exists("jack_validity", inherits = FALSE)) source("analysis/prep_boot_validity.R")
+if (!exists("jack_validity", inherits = FALSE)) source("analysis/prep_jack_validity.R")
 
 OUT_DIR <- "outputs/tables"
 dir.create(OUT_DIR, recursive = TRUE, showWarnings = FALSE)
@@ -41,6 +41,8 @@ write_latex_table <- function(df, file, caption, label, align, fmt) {
     body,
     "\\bottomrule",
     "\\end{tabular}",
+    "\\vspace{4pt}",
+    "{\\footnotesize Note: Only conditions in which at least one jackknife estimate was inadmissible are reported.}",
     "\\end{table}"
   )
   writeLines(lines, file)
@@ -50,35 +52,37 @@ bv_tab <- bv %>%
   transmute(`$\\phi$`        = correlation.x,
             `Data Distribution`     = dtype.x,
             `$n$`            = n.x,
-            `0`        = .data[["0"]],
-            `0--1`    = .data[["0-1"]],
-            `1--100`   = .data[["1-100"]])
+            `0\\%`           = .data[["0"]],
+            `(0\\%,5\\%]`    = .data[["0-5"]],
+            `(5\\%,10\\%]`   = .data[["5-10"]],
+            `(10\\%,100\\%]` = .data[["10-100"]])
 
 jack_validity_tab <- jack_validity %>% 
   transmute(`$\\phi$`        = correlation.x,
             `Data Distribution`     = dtype.x,
             `$n$`            = n.x,
-            `0`        = .data[["0"]],
-            `0--1`    = .data[["0-1"]],
-            `1--100`   = .data[["1-100"]])
+            `0\\%`           = .data[["0"]],
+            `(0\\%,5\\%]`    = .data[["0-5"]],
+            `(5\\%,10\\%]`   = .data[["5-10"]],
+            `(10\\%,100\\%]` = .data[["10-100"]])
 
 write_latex_table(
   bv_tab,
   file    = file.path(OUT_DIR, "jack_validity.tex"),
-  caption = paste("Relative frequency [in \\%] of replications by percentage of jackknife samples for which the HTMT could not be computed, across conditions. Only simulation conditions are shown in which the HTMT could not be calculated for at least one jackknife sample."),
+  caption = paste("Relative frequency [in \\%] of simulation runs by percentage of jackknife samples for which the HTMT is not admissible, across conditions."),
   label   = "tab:jack-validity",
-  align   = c("r", "l", "r", "r", "r", "r"),
+  align   = c("r", "l", "r", "r", "r", "r", "r"),
   fmt     = c("%.2f", "s", "%d",
-              "%.1f", "%.1f", "%.1f")
+              "%.1f", "%.1f", "%.1f", "%.1f")
 )
 
 write_latex_table(
   jack_validity_tab,
   file    = file.path(OUT_DIR, "jack_validity_all.tex"),
-  caption = paste("Relative frequency [in \\%] of replications by percentage of jackknife samples for which the HTMT could not be computed, across conditions. Only simulation conditions are shown in which the HTMT could not be calculated for at least one jackknife sample."),
+  caption = paste("Relative frequency [in \\%] of simulation runs by percentage of jackknife samples for which the HTMT is not admissible, across conditions."),
   label   = "tab:jack-validity-all",
-  align   = c("r", "l", "r", "r", "r", "r"),
+  align   = c("r", "l", "r", "r", "r", "r", "r"),
   fmt     = c("%.2f", "s", "%d",
-              "%.1f", "%.1f", "%.1f")
+              "%.1f", "%.1f", "%.1f", "%.1f")
 )
 
