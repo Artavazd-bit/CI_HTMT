@@ -40,7 +40,7 @@ skewdensplots <- ggplot(skew, aes(skewness)) +
              labeller = as_labeller(c(`111` = "$n = 25, \\phi = 1$, Severely Non-Normal",
                                       `121` = "$n = 400, \\phi = 1$, Normal"))) +
   geom_vline(data = skew_stats, aes(xintercept = mean), linetype = "dashed") +
-  geom_vline(data = skew_stats, aes(xintercept = median), linetype = "dotted") +
+  #geom_vline(data = skew_stats, aes(xintercept = median), linetype = "dotted") +
   labs(x = "Skewness of the bootstrap HTMT distribution", y = "Density") + 
   theme_minimal()
 
