@@ -41,7 +41,7 @@ skewdensplots <- ggplot(skew, aes(skewness)) +
                                       `121` = "$n = 400, \\phi = 1$, Normal"))) +
   geom_vline(data = skew_stats, aes(xintercept = mean), linetype = "dashed") +
   #geom_vline(data = skew_stats, aes(xintercept = median), linetype = "dotted") +
-  labs(x = "Skewness of the bootstrap HTMT distribution", y = "Density") + 
+  labs(x = "Skewness of the Bootstrap HTMT Distribution", y = "Density") + 
   theme_minimal()
 
 tikz(file = sprintf("outputs/plots/skewdensplots.tex"), width=8.4, height=5.2)

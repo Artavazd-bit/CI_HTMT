@@ -41,7 +41,7 @@ for (cl in sort(unique(resag$conf_level))) {
                labeller = labeller(dtype2 = dtype_labeller)) +
     geom_hline(data = d, aes(yintercept = hline)) +
     theme_minimal() + 
-    scale_y_continuous(breaks = y_breaks, name = "Rejection Rate (\\%)") +
+    scale_y_continuous(breaks = y_breaks, limits = c(0, 100), name = "Rejection Rate (\\%)") +
     theme(legend.position = "bottom", 
           axis.text.x = element_text(angle = 45, hjust = 1)) +
     labs(x = "Sample Size") +

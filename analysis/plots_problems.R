@@ -15,6 +15,9 @@ dtype_labeller <- c(normal   = "Normal",
 problems_plot <- problems
 problems_plot$dtype <- factor(problems_plot$dtype,
                               levels = c("normal", "moderate", "severe"))
+problems_plot$method2 <- factor(problems_plot$method2,
+                                levels = c("Percentile", "BC", "BCa",
+                                           "Asymptotic", "CFA-ML", "CFA-MLR"))
 
 # Heatmap: same facet layout, fill = failure rate. Cells with 0% stay white
 make_problems_heatmap <- function(d) {
